@@ -46,7 +46,7 @@ void compile_shader(const std::string &shader_code, const GLuint shader_id, cons
         const char *msg = &error_message[0];
         throw std::logic_error(msg);
     }
-    assert(Result == GL_TRUE);
+    assert(result == GL_TRUE);
 }
 
 GLuint load_shaders(const char *vertex_file_path, const char *fragment_file_path) {

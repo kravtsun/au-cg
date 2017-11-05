@@ -437,3 +437,4 @@ samples/
 # CLion generated file for CMake
 *.cbp
 
+3rdparty/glm/include

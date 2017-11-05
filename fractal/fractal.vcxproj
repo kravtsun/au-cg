@@ -111,6 +111,9 @@
       <AdditionalDependencies>opengl32.lib;AntTweakBar.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\3rdparty\glfw-3.2.1.bin.WIN64\lib-vc2015;$(SolutionDir)\..\3rdparty\AntTweakBar\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y $(SolutionDir)\..\3rdparty\AntTweakBar\lib\AntTweakBar64.dll $(OutputPath)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -150,6 +153,9 @@
       <AdditionalDependencies>opengl32.lib;AntTweakBar.lib;glew32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\..\3rdparty\glfw-3.2.1.bin.WIN64\lib-vc2015;$(SolutionDir)\..\3rdparty\AntTweakBar\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y $(SolutionDir)\..\3rdparty\AntTweakBar\lib\AntTweakBar64.dll $(OutputPath)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
