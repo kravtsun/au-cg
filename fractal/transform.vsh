@@ -1,7 +1,7 @@
 #version 330 core
 
 // Input vertex data, different for all executions of this shader.
-layout(location = 0) in vec3 vertexPosition_modelspace;
+layout(location = 0) in vec2 vertexPosition_modelspace;
 
 // Output data ; will be interpolated for each fragment.
 out float texture_color;
@@ -33,7 +33,7 @@ vec2 complex_multiply(vec2 lhs, vec2 rhs) {
 
 void main() {
     // Output position of the vertex, in clip space : MVP * position
-    gl_Position =  MVP * vec4(vertexPosition_modelspace, 1);
+    gl_Position =  MVP * vec4(vertexPosition_modelspace, 1, 1);
 	vec2 pos = center + scale * gl_Position.xy;
     vec2 z = vec2(0, 0);
     int it = 0;

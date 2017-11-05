@@ -96,19 +96,18 @@ void init_gl()
 	glGenVertexArrays(1, &vertex_array_id);
 	glBindVertexArray(vertex_array_id);
 
-	GLfloat *points = new GLfloat[3 * NPOINTS];
+	GLfloat *points = new GLfloat[2 * NPOINTS];
 
 	for (int i = 0; i < NPOINTS; ++i) {
 		auto y = static_cast<GLfloat>(i / POINTS_WIDTH) / POINTS_HEIGHT;
 		auto x = static_cast<GLfloat>(i % POINTS_WIDTH) / POINTS_WIDTH;
-		points[3 * i + 0] = -1.0f + 2 * x;
-		points[3 * i + 1] = -1.0f + 2 * y;
-		points[3 * i + 2] = 0.0f;
+		points[2 * i + 0] = -1.0f + 2 * x;
+		points[2 * i + 1] = -1.0f + 2 * y;
 	}
 
 	glGenBuffers(1, &vertexbuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 3 * NPOINTS * sizeof(GLfloat), points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 2 * NPOINTS * sizeof(GLfloat), points, GL_STATIC_DRAW);
 
 	// Use our shader
 	glUseProgram(program_id);
@@ -124,7 +123,7 @@ void init_gl()
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
 	glVertexAttribPointer(
 		0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-		3,                  // size
+		2,                  // size
 		GL_FLOAT,           // type
 		GL_FALSE,           // normalized?
 		0,                  // stride
