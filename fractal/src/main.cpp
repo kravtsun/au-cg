@@ -14,17 +14,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-// TODO unfix window size.
-#define WIN_WIDTH 1024
-#define WIN_HEIGHT 768
-
-#define POINTS_WIDTH WIN_WIDTH
-#define POINTS_HEIGHT WIN_HEIGHT
-
-#define NPOINTS (POINTS_WIDTH * POINTS_HEIGHT)
-
-
+int win_width = 1024, win_height = 768;
 GLFWwindow* window;
+
 void init_glfw()
 {
 	// Initialise GLFW
@@ -40,7 +32,8 @@ void init_glfw()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	// Open a window and create its OpenGL context
-	window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "Fractal", nullptr, nullptr);
+	window = glfwCreateWindow(win_width, win_height, "Fractal", nullptr, nullptr);
+	
 	if (window == nullptr) {
 		throw std::logic_error("Failed to open GLFW window. "
 			"If you have an Intel GPU, "
@@ -48,11 +41,7 @@ void init_glfw()
 			"Try the 2.1 version of the tutorials.\n");
 	}
 	glfwMakeContextCurrent(window);
-
-	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-	// Hide the mouse and enable unlimited mouvement
-	//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void init_glew()
@@ -96,19 +85,6 @@ void init_gl()
 	glGenVertexArrays(1, &vertex_array_id);
 	glBindVertexArray(vertex_array_id);
 
-	GLfloat *points = new GLfloat[2 * NPOINTS];
-
-	for (int i = 0; i < NPOINTS; ++i) {
-		auto y = static_cast<GLfloat>(i / POINTS_WIDTH) / POINTS_HEIGHT;
-		auto x = static_cast<GLfloat>(i % POINTS_WIDTH) / POINTS_WIDTH;
-		points[2 * i + 0] = -1.0f + 2 * x;
-		points[2 * i + 1] = -1.0f + 2 * y;
-	}
-
-	glGenBuffers(1, &vertexbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 2 * NPOINTS * sizeof(GLfloat), points, GL_STATIC_DRAW);
-
 	// Use our shader
 	glUseProgram(program_id);
 
@@ -117,6 +93,31 @@ void init_gl()
 	glBindTexture(GL_TEXTURE_1D, texture);
 	// Set our "myTextureSampler" sampler to use Texture Unit 0
 	glUniform1i(texture_id, 0);
+
+	glGenBuffers(1, &vertexbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+}
+
+GLuint iterations = 100;
+GLfloat abs_lim = 10.0f;
+
+glm::vec2 center;
+GLfloat scale = 1.0;
+GLfloat scale_delta_multiplier = 1.1f;
+
+void paint_gl()
+{
+	const GLsizei npts = win_width * win_height;
+	GLfloat *points = new GLfloat[2 * npts];
+
+	for (int i = 0; i < npts; ++i) {
+		auto y = static_cast<GLfloat>(i / win_width) / win_height;
+		auto x = static_cast<GLfloat>(i % win_width) / win_width;
+		points[2 * i + 0] = -1.0f + 2 * x;
+		points[2 * i + 1] = -1.0f + 2 * y;
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+	glBufferData(GL_ARRAY_BUFFER, 2 * npts * sizeof(GLfloat), points, GL_STATIC_DRAW);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -129,17 +130,7 @@ void init_gl()
 		0,                  // stride
 		static_cast<void*>(nullptr)            // array buffer offset
 	);
-}
 
-GLuint iterations = 100;
-GLfloat abs_lim = 10.0f;
-
-glm::vec2 center;
-GLfloat scale = 1.0;
-GLfloat scale_delta_multiplier = 1.1f;
-
-void paint_gl()
-{
 	// Clear the screen
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -159,13 +150,13 @@ void paint_gl()
 	glUniform2f(center_id, center.x, center.y);
 	glUniform1f(scale_id, scale);
 
-	glDrawArrays(GL_POINTS, 0, NPOINTS);
+	glDrawArrays(GL_POINTS, 0, npts);
+	glDisableVertexAttribArray(0);
+	delete[]points;
 }
 
 void deinit_gl()
 {
-	glDisableVertexAttribArray(0);
-
 	// Cleanup VBO and shader
 	glDeleteBuffers(1, &vertexbuffer);
 	glDeleteProgram(program_id);
@@ -231,8 +222,8 @@ void glfw_mouse_pos_callback(GLFWwindow *_window, double xpos, double ypos)
 		if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 		{
 			auto pos_delta = cur_pos - mouse_pos;
-			pos_delta.x *= -2 * scale / WIN_WIDTH;
-			pos_delta.y *= 2 * scale / WIN_HEIGHT;
+			pos_delta.x *= -2 * scale / win_width;
+			pos_delta.y *= 2 * scale / win_height;
 			center += pos_delta;
 		}
 	}
@@ -355,8 +346,13 @@ GLFWwindowsizefun default_resize_callback;
 void glfw_resize_callback(GLFWwindow* _window, int width, int height)
 {
 	assert(_window == window);
-	//glfwGetWindowSize(window, &width, &height);
+	::win_width = width;
+	::win_height = height;
 	TwWindowSize(width, height);
+	glViewport(0, 0, width, height);
+	//glfwGetWindowFrameSize();
+
+	//glfwSetWindowSize(_window, width, height);
 	if (default_resize_callback)
 	{
 		default_resize_callback(_window, width, height);
@@ -376,10 +372,9 @@ void init_atb()
 {
 	int tw_error = TwInit(TW_OPENGL_CORE, nullptr);
 	throw_on_atb_error(tw_error, "TwInit");
-	
-	
+
 	myBar = TwNewBar("FractalTweakBar");
-	tw_error = TwWindowSize(WIN_WIDTH, WIN_HEIGHT);
+	tw_error = TwWindowSize(win_width, win_height);
 	throw_on_atb_error(tw_error, "TwWindowSize");
 
 	tw_error = TwAddVarRW(myBar, "iterations", TW_TYPE_UINT32, &iterations, "");
@@ -387,6 +382,9 @@ void init_atb()
 
 	tw_error = TwAddVarRW(myBar, "abs_limit", TW_TYPE_FLOAT, &abs_lim, "");
 	throw_on_atb_error(tw_error, "TwAddVarRw(AbsLimit)");
+
+	tw_error = TwAddVarRW(myBar, "scale", TW_TYPE_FLOAT, &scale, "");
+	throw_on_atb_error(tw_error, "TwAddVarRO(scale)");
 
 	// after GLFW initialization
 	// directly redirect GLFW events to AntTweakBar
