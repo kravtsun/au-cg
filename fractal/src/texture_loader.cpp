@@ -1,17 +1,13 @@
-//
-// Created by kravtsun on 05.11.17.
-//
-
 #include "texture_loader.h"
 
-GrayscaleTextureLoader::GrayscaleTextureLoader(size_t count)
+GrayscaleTextureLoader::GrayscaleTextureLoader(GLuint count)
     : count_(count)
 {}
 
 GLuint GrayscaleTextureLoader::getTexture() {
     GLuint width = count_ + 1;
     GLfloat *data = new GLfloat[width];
-    for (int i = 0; i < width; ++i) {
+    for (size_t i = 0; i < width; ++i) {
         data[i] = (GLfloat)i / count_;
     }
 

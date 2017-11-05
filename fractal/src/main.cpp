@@ -3,7 +3,10 @@
 #include "shader.hpp"
 #include "texture_loader.h"
 
+#define GLEW_STATIC
 #include <GL/glew.h>
+#include <AntTweakBar.h>
+
 
 #include <GLFW/glfw3.h>
 
@@ -140,7 +143,7 @@ int main() {
         glUniform1i(IterationsID, 100);
         glUniform1f(AbsLimID, 10.0f);
 
-        std::cout << i++ << std::endl;
+        //std::cout << i++ << std::endl;
 
         glDrawArrays(GL_POINTS, 0, npts);
 

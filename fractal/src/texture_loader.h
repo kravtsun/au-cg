@@ -5,7 +5,6 @@
 #ifndef FRACTAL_TEXTURE_LOADER_H
 #define FRACTAL_TEXTURE_LOADER_H
 
-
 #include <GL/glew.h>
 
 class AbstractTextureLoader {
@@ -17,15 +16,12 @@ public:
 class GrayscaleTextureLoader : public AbstractTextureLoader {
 public:
 
-    GrayscaleTextureLoader(size_t count);
+    GrayscaleTextureLoader(GLuint count);
 
     GLuint getTexture() override;
 
 private:
-    size_t  count_;
+	GLuint  count_;
 };
-
-
-
 
 #endif //FRACTAL_TEXTURE_LOADER_H
