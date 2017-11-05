@@ -10,9 +10,9 @@ GrayscaleTextureLoader::GrayscaleTextureLoader(size_t count)
 
 GLuint GrayscaleTextureLoader::getTexture() {
     GLuint width = count_ + 1;
-    auto data = new GLfloat[width];
+    GLfloat *data = new GLfloat[width];
     for (int i = 0; i < width; ++i) {
-        data[i] = i / count_;
+        data[i] = (GLfloat)i / count_;
     }
 
     GLuint textureID;
@@ -20,7 +20,7 @@ GLuint GrayscaleTextureLoader::getTexture() {
 
     glBindTexture(GL_TEXTURE_1D, textureID);
 
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, count_, 0, GL_RGB, GL_FLOAT, data);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, width, 0, GL_RED, GL_FLOAT, data);
 
     // Poor filtering:
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

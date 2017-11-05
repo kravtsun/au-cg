@@ -14,10 +14,9 @@
 
 #define WIN_WIDTH 1024
 #define WIN_HEIGHT 768
-#define FOV 45.0
 
-#define POINTS_WIDTH 1024
-#define POINTS_HEIGHT 768
+#define POINTS_WIDTH WIN_WIDTH
+#define POINTS_HEIGHT WIN_HEIGHT
 
 
 int main() {
@@ -38,7 +37,7 @@ int main() {
 
     // Open a window and create its OpenGL context
     GLFWwindow* window = glfwCreateWindow( WIN_WIDTH, WIN_HEIGHT, "Fractal", NULL, NULL);
-    if( window == NULL ){
+    if( window == NULL ) {
         fprintf( stderr, "Failed to open GLFW window. "
                          "If you have an Intel GPU, "
                          "they are not 3.3 compatible. "
@@ -82,7 +81,6 @@ int main() {
     GLfloat *points = new GLfloat[3 * npts];
 
     std::set<GLfloat> yy;
-//    i = y * width + x;
     for (int i = 0; i < npts; ++i) {
         GLfloat y = (GLfloat)(i / POINTS_WIDTH) / POINTS_HEIGHT;
         GLfloat x = (GLfloat)(i % POINTS_WIDTH) / POINTS_WIDTH;
@@ -92,22 +90,6 @@ int main() {
         points[3*i + 2] = 0.0f;
     }
 
-
-//    const GLfloat points[] = {
-//        -0.5, -0.5, 0.0f,
-////        -0.5, 0.5, 0.0f,
-////        0.5, -0.5, 0.0f,
-////        0.5, 0.5, 0.0f
-//    };
-//    const size_t npts = sizeof(points) / 3;
-
-//    GLfloat maxx = -1.0f, maxy = -1.0f;
-
-//    for (int i = 0; i < npts; ++i) {
-//        maxx = std::min(maxx, points[3*i + 0]);
-//        maxy = std::min(maxy, points[3*i + 1]);
-//    }
-
     // Create and compile our GLSL program from the shaders
     GLuint programID = LoadShaders("transform.vsh", "texture.fsh");
 
@@ -115,6 +97,8 @@ int main() {
     GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
     GLuint IterationsID = glGetUniformLocation(programID, "iterations");
+
+    GLuint AbsLimID = glGetUniformLocation(programID, "abs_lim2");
 
     // Load texture.
     GLuint Texture = GrayscaleTextureLoader(256).getTexture();
@@ -135,7 +119,6 @@ int main() {
         glUseProgram(programID);
 
         // TODO change to ortho projection.
-//        glm::mat4 ProjectionMatrix = glm::perspective((float)glm::radians(FOV), 4.0f / 3.0f, 0.1f, 100.0f);
         glm::mat4 ProjectionMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 2.0f);
         // Camera matrix
         glm::mat4 ViewMatrix       = glm::lookAt(glm::vec3(0.0, 0.0, 1.0),// eye
@@ -148,7 +131,8 @@ int main() {
         // Send our transformation to the currently bound shader,
         // in the "MVP" uniform
         glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
-        glUniform1d(IterationsID, 100);
+        glUniform1i(IterationsID, 100);
+        glUniform1f(AbsLimID, 10.0f);
 
         // Bind our texture in Texture Unit 0
         glActiveTexture(GL_TEXTURE0);
