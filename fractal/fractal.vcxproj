@@ -160,6 +160,14 @@
     <ClInclude Include="src\shader.hpp" />
     <ClInclude Include="src\texture_loader.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="texture.fsh" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="transform.vsh">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

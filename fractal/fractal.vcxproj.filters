@@ -33,4 +33,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="texture.fsh">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="transform.vsh">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

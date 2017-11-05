@@ -1,20 +1,20 @@
 #include "texture_loader.h"
 
-GrayscaleTextureLoader::GrayscaleTextureLoader(GLuint count)
+GrayscaleTextureLoader::GrayscaleTextureLoader(const GLuint count)
     : count_(count)
 {}
 
-GLuint GrayscaleTextureLoader::getTexture() {
-    GLuint width = count_ + 1;
-    GLfloat *data = new GLfloat[width];
+GLuint GrayscaleTextureLoader::get_texture() {
+	const auto width = count_ + 1;
+	const auto data = new GLfloat[width];
     for (size_t i = 0; i < width; ++i) {
-        data[i] = (GLfloat)i / count_;
+        data[i] = static_cast<GLfloat>(i) / count_;
     }
 
-    GLuint textureID;
-    glGenTextures(1, &textureID);
+    GLuint texture_id;
+    glGenTextures(1, &texture_id);
 
-    glBindTexture(GL_TEXTURE_1D, textureID);
+    glBindTexture(GL_TEXTURE_1D, texture_id);
 
     glTexImage1D(GL_TEXTURE_1D, 0, GL_RED, width, 0, GL_RED, GL_FLOAT, data);
 
@@ -32,5 +32,5 @@ GLuint GrayscaleTextureLoader::getTexture() {
 
     delete []data;
 
-    return textureID;
+    return texture_id;
 }

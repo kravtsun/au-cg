@@ -9,16 +9,19 @@
 
 class AbstractTextureLoader {
 public:
-    virtual GLuint getTexture() = 0;
+    virtual GLuint get_texture() = 0;
+
+	virtual ~AbstractTextureLoader() {}
 };
 
 
 class GrayscaleTextureLoader : public AbstractTextureLoader {
 public:
+    explicit GrayscaleTextureLoader(GLuint count);
 
-    GrayscaleTextureLoader(GLuint count);
+    GLuint get_texture() override;
 
-    GLuint getTexture() override;
+	virtual ~GrayscaleTextureLoader() {}
 
 private:
 	GLuint  count_;
