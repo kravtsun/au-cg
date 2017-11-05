@@ -14,6 +14,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// TODO unfix window size.
 #define WIN_WIDTH 1024
 #define WIN_HEIGHT 768
 
@@ -65,7 +66,7 @@ void init_glew()
 
 GLuint program_id;
 GLuint vertexbuffer;
-GLuint matrix_id, iterations_id, abs_lim_id;
+GLuint matrix_id, iterations_id, abs_lim_id, center_id, scale_id;
 GLuint texture_id;
 GLuint vertex_array_id;
 
@@ -80,6 +81,10 @@ void init_gl()
 	iterations_id = glGetUniformLocation(program_id, "iterations");
 
 	abs_lim_id = glGetUniformLocation(program_id, "abs_lim2");
+
+	center_id = glGetUniformLocation(program_id, "center");
+
+	scale_id = glGetUniformLocation(program_id, "scale");
 
 	// Load texture.
 	const GLuint texture = GrayscaleTextureLoader(256).get_texture();
@@ -129,6 +134,11 @@ void init_gl()
 
 GLuint iterations = 100;
 GLfloat abs_lim = 10.0f;
+
+glm::vec2 center;
+GLfloat scale = 1.0;
+GLfloat scale_delta_multiplier = 1.1f;
+
 void paint_gl()
 {
 	// Clear the screen
@@ -147,6 +157,8 @@ void paint_gl()
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
 	glUniform1i(iterations_id, iterations);
 	glUniform1f(abs_lim_id, abs_lim);
+	glUniform2f(center_id, center.x, center.y);
+	glUniform1f(scale_id, scale);
 
 	glDrawArrays(GL_POINTS, 0, NPOINTS);
 }
@@ -162,17 +174,32 @@ void deinit_gl()
 	glDeleteVertexArrays(1, &vertex_array_id);
 }
 
+glm::vec2 mouse_pos;
+
 //*  @param[in] window The window that received the event.
 //*  @param[in] button The[mouse button](@ref buttons) that was pressed or
 //*released.
 //*  @param[in] action One of `GLFW_PRESS` or `GLFW_RELEASE`.
 //*  @param[in] mods Bit field describing which[modifier keys](@ref mods) were
+GLFWmousebuttonfun default_mouse_button_callback;
 void glfw_mouse_button_callback(GLFWwindow *_window, int button, int action, int mods)
 {
 	assert(_window == window);
 	if (!TwEventMouseButtonGLFW(button, action))
 	{
-		return;
+		//if (default_mouse_button_callback)
+		//{
+		//	default_mouse_button_callback(_window, button, action, mods);
+		//}
+		if (action == GLFW_PRESS)
+		{
+			
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			
+		}
+		// TODO workaround when mouse lefts the screen.
 	}
 }
 
@@ -190,13 +217,29 @@ void glfw_mouse_button_callback(GLFWwindow *_window, int button, int action, int
 //*  @ingroup input
 //* /
 //typedef void(*GLFWcursorposfun)(GLFWwindow*, double, double);
+GLFWcursorposfun default_mouse_pos_callback;
 void glfw_mouse_pos_callback(GLFWwindow *_window, double xpos, double ypos)
 {
 	assert(_window == window);
 	if (!TwEventMousePosGLFW(static_cast<int>(xpos), static_cast<int>(ypos)))
 	{
-		return;
+		//if (default_mouse_pos_callback)
+		//{
+		//	default_mouse_pos_callback(_window, xpos, ypos);
+		//}
+
+		glm::vec2 cur_pos{ xpos, ypos };
+		if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
+		{
+			auto pos_delta = cur_pos - mouse_pos;
+			pos_delta.x *= -2 * scale / WIN_WIDTH;
+			pos_delta.y *= 2 * scale / WIN_HEIGHT;
+			center += pos_delta;
+		}
 	}
+	mouse_pos = glm::vec2(static_cast<GLfloat>(xpos), static_cast<GLfloat>(ypos));
+	
+	//std::cout << mouse_pos.x << "," << mouse_pos.y << std::endl;
 }
 
 //*@param[in] window The window that received the event.
@@ -211,10 +254,27 @@ void glfw_mouse_pos_callback(GLFWwindow *_window, double xpos, double ypos)
 //*  @ingroup input
 //* /
 //typedef void(*GLFWscrollfun)(GLFWwindow*, double, double);
+GLFWscrollfun default_mouse_wheel_callback;
 void glfw_mouse_wheel_callback(GLFWwindow *_window, double xoffset, double yoffset)
 {
 	assert(_window == window);
-	//if (!TwEventMouseWheelGLFW(int pos))
+	if (!TwEventMouseWheelGLFW(static_cast<int>(yoffset)))
+	{
+		//if (default_mouse_wheel_callback)
+		//{
+		//	default_mouse_wheel_callback(_window, xoffset, yoffset);
+		//}
+		assert(xoffset == 0.0);
+		assert(scale_delta_multiplier > 1);
+		if (yoffset < 0)
+		{
+			scale *= scale_delta_multiplier;
+		}
+		else if (yoffset > 0)
+		{
+			scale /= scale_delta_multiplier;
+		}
+	}
 }
 
 //*@param[in] window The window that received the event.
@@ -233,12 +293,22 @@ void glfw_mouse_wheel_callback(GLFWwindow *_window, double xoffset, double yoffs
 //*  @ingroup input
 //* /
 //typedef void(*GLFWkeyfun)(GLFWwindow*, int, int, int, int);
+GLFWkeyfun default_key_callback;
 void glfw_key_callback(GLFWwindow *_window, int key, int scancode, int action, int mods)
 {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		glfwSetWindowShouldClose(window, true);
+		return;
+	}
+
 	assert(_window == window);
 	if (!TwEventKeyGLFW(key, action))
 	{
-		return;
+		if (default_key_callback)
+		{
+			default_key_callback(_window, key, scancode, action, mods);
+		}
 	}
 }
 
@@ -254,13 +324,17 @@ void glfw_key_callback(GLFWwindow *_window, int key, int scancode, int action, i
 //*  @ingroup input
 //* /
 //typedef void(*GLFWcharfun)(GLFWwindow*, unsigned int);
+GLFWcharfun default_char_callback;
 void glfw_char_callback(GLFWwindow *_window, unsigned int input_char)
 {
 	assert(_window == window);
 	int glfw_action = GLFW_PRESS;
 	if (!TwEventCharGLFW(input_char, glfw_action))
 	{
-		return;
+		if (default_char_callback)
+		{
+			default_char_callback(_window, input_char);
+		}
 	}
 }
 
@@ -278,47 +352,54 @@ void glfw_char_callback(GLFWwindow *_window, unsigned int input_char)
 //*  @ingroup window
 //* /
 //typedef void(*GLFWwindowsizefun)(GLFWwindow*, int, int);
-void glfw_resize(GLFWwindow* _window, int width, int height)
+GLFWwindowsizefun default_resize_callback;
+void glfw_resize_callback(GLFWwindow* _window, int width, int height)
 {
 	assert(_window == window);
 	//glfwGetWindowSize(window, &width, &height);
 	TwWindowSize(width, height);
+	if (default_resize_callback)
+	{
+		default_resize_callback(_window, width, height);
+	}
+}
+
+void throw_on_atb_error(int tw_error, const std::string &probable_cause)
+{
+	if (tw_error == 0)
+	{
+		throw std::logic_error(probable_cause + ": " + TwGetLastError());
+	}
 }
 
 TwBar *myBar;
 void init_atb()
 {
-	int tw_error = TwInit(TW_OPENGL_CORE, NULL);
-	if (tw_error == 0)
-	{
-		throw std::logic_error(std::string("TwInit: ") + TwGetLastError());
-	}
+	int tw_error = TwInit(TW_OPENGL_CORE, nullptr);
+	throw_on_atb_error(tw_error, "TwInit");
+	
 	
 	myBar = TwNewBar("FractalTweakBar");
 	tw_error = TwWindowSize(WIN_WIDTH, WIN_HEIGHT);
-	if (tw_error == 0)
-	{
-		throw std::logic_error(std::string("TwWindowSize: ") + TwGetLastError());
-	}
+	throw_on_atb_error(tw_error, "TwWindowSize");
 
 	tw_error = TwAddVarRW(myBar, "iterations", TW_TYPE_UINT32, &iterations, "");
+	throw_on_atb_error(tw_error, "TwAddVarRw(iterations)");
 
-	if (tw_error == 0)
-	{
-		throw std::logic_error(std::string("TwAddVarRW: ") + TwGetLastError());
-	}
+	tw_error = TwAddVarRW(myBar, "abs_limit", TW_TYPE_FLOAT, &abs_lim, "");
+	throw_on_atb_error(tw_error, "TwAddVarRw(AbsLimit)");
 
 	// after GLFW initialization
 	// directly redirect GLFW events to AntTweakBar
 	glfwSetMouseButtonCallback(window, static_cast<GLFWmousebuttonfun>(glfw_mouse_button_callback));
-	glfwSetCursorPosCallback(window, static_cast<GLFWcursorposfun>(glfw_mouse_pos_callback));
-	glfwSetScrollCallback(window, static_cast<GLFWscrollfun>(glfw_mouse_wheel_callback));
+	default_mouse_pos_callback = glfwSetCursorPosCallback(window, static_cast<GLFWcursorposfun>(glfw_mouse_pos_callback));
+	default_mouse_wheel_callback = glfwSetScrollCallback(window, static_cast<GLFWscrollfun>(glfw_mouse_wheel_callback));
 
 	glfwSetKeyCallback(window, static_cast<GLFWkeyfun>(glfw_key_callback));
 	glfwSetCharCallback(window, static_cast<GLFWcharfun>(glfw_char_callback));
 
 	// send window size events to AntTweakBar
-	glfwSetWindowSizeCallback(window, static_cast<GLFWwindowsizefun>(glfw_resize)); // and call TwWindowSize in the function MyResize
+	glfwSetWindowSizeCallback(window, static_cast<GLFWwindowsizefun>(glfw_resize_callback)); // and call TwWindowSize in the function MyResize
 }
 
 int main()
@@ -330,15 +411,16 @@ int main()
 		init_atb();
 		init_gl();
 	}
-	catch(...)
+	catch(std::exception e)
 	{
+		std::cerr << e.what() << std::endl;
 		glfwTerminate();
 		return -1;
 	}
 
 	try
 	{
-		do
+		while (!glfwWindowShouldClose(window))
 		{
 			paint_gl();
 			int twError = TwDraw();
@@ -351,8 +433,6 @@ int main()
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 		} // Check if the ESC key was pressed or the window was closed
-		while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-			glfwWindowShouldClose(window) == 0);
 	}
 	catch(std::exception e)
 	{

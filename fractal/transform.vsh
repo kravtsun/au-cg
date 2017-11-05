@@ -10,6 +10,8 @@ out float texture_color;
 uniform mat4 MVP;
 uniform int iterations;
 uniform float abs_lim2;
+uniform vec2 center;
+uniform float scale;
 
 float complex_abs2(vec2 z) {
     return z.x * z.x + z.y * z.y;
@@ -32,15 +34,12 @@ vec2 complex_multiply(vec2 lhs, vec2 rhs) {
 void main() {
     // Output position of the vertex, in clip space : MVP * position
     gl_Position =  MVP * vec4(vertexPosition_modelspace, 1);
-    float x = gl_Position.x;
-    float y = gl_Position.y;
-
+	vec2 pos = center + scale * gl_Position.xy;
     vec2 z = vec2(0, 0);
     int it = 0;
-    float k = 3;
     while (it < iterations && complex_abs2(z) < abs_lim2) {
         vec2 z2 = complex_multiply(z, z);
-        z = complex_sum(z2, vec2(x * k, y * k));
+        z = complex_sum(z2, pos);
         it++;
     }
     texture_color = float(it) / iterations;
