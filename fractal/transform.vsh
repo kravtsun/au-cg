@@ -44,6 +44,5 @@ void main() {
         it++;
     }
     texture_color = float(it) / iterations;
-//    texture_color = abs_lim2;
 }
 

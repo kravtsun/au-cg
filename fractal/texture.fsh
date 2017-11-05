@@ -13,6 +13,4 @@ void main() {
     // Output color = color of the texture at the specified UV
     float r = texture(myTextureSampler, texture_color).r;
     color = vec3(r, 0, 0);
-//    color = vec3(0.5, 0.5, 0.5);
-//    color = vec3(1, 1, 1);
 }

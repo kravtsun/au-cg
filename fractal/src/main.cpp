@@ -62,17 +62,6 @@ int main() {
     // Hide the mouse and enable unlimited mouvement
 //    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-//    // Dark blue background
-//    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
-
-//    // Enable depth test
-//    glEnable(GL_DEPTH_TEST);
-//    // Accept fragment if it closer to the camera than the former one
-//    glDepthFunc(GL_LESS);
-
-//    // Cull triangles which normal is not towards the camera
-//    glEnable(GL_CULL_FACE);
-
     GLuint VertexArrayID;
     glGenVertexArrays(1, &VertexArrayID);
     glBindVertexArray(VertexArrayID);
@@ -111,19 +100,36 @@ int main() {
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, 3 * npts * sizeof(GLfloat), points, GL_STATIC_DRAW);
 
+    // Use our shader
+    glUseProgram(programID);
+
+    // Bind our texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_1D, Texture);
+    // Set our "myTextureSampler" sampler to use Texture Unit 0
+    glUniform1i(TextureID, 0);
+
+    // 1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(
+        0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
+        3,                  // size
+        GL_FLOAT,           // type
+        GL_FALSE,           // normalized?
+        0,                  // stride
+        (void*)0            // array buffer offset
+    );
+
+    int i = 0;
     do {
         // Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-        // Use our shader
-        glUseProgram(programID);
-
-        // TODO change to ortho projection.
         glm::mat4 ProjectionMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 2.0f);
-        // Camera matrix
-        glm::mat4 ViewMatrix       = glm::lookAt(glm::vec3(0.0, 0.0, 1.0),// eye
-                                                 glm::vec3(0.0, 0.0, 0.0),// center
-                                                 glm::vec3(0.0, 1.0, 0.0) // up
+        glm::mat4 ViewMatrix       = glm::lookAt(glm::vec3(0.0, 0.0, 1.0), // eye
+                                                 glm::vec3(0.0, 0.0, 0.0), // center
+                                                 glm::vec3(0.0, 1.0, 0.0)  // up
                                                  );
         glm::mat4 ModelMatrix = glm::mat4(1.0);
         glm::mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
@@ -134,27 +140,9 @@ int main() {
         glUniform1i(IterationsID, 100);
         glUniform1f(AbsLimID, 10.0f);
 
-        // Bind our texture in Texture Unit 0
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_1D, Texture);
-        // Set our "myTextureSampler" sampler to use Texture Unit 0
-        glUniform1i(TextureID, 0);
-
-        // 1rst attribute buffer : vertices
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(
-            0,                  // attribute. No particular reason for 0, but must match the layout in the shader.
-            3,                  // size
-            GL_FLOAT,           // type
-            GL_FALSE,           // normalized?
-            0,                  // stride
-            (void*)0            // array buffer offset
-        );
+        std::cout << i++ << std::endl;
 
         glDrawArrays(GL_POINTS, 0, npts);
-
-        glDisableVertexAttribArray(0);
 
         // Swap buffers
         glfwSwapBuffers(window);
@@ -163,6 +151,8 @@ int main() {
     } // Check if the ESC key was pressed or the window was closed
     while( glfwGetKey(window, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
            glfwWindowShouldClose(window) == 0 );
+
+    glDisableVertexAttribArray(0);
 
     // Cleanup VBO and shader
     glDeleteBuffers(1, &vertexbuffer);
