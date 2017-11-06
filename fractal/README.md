@@ -10,10 +10,6 @@ sudo apt-get install libglew-dev libglfw3
 git submodule update --recursive --remote .
 ```
 
-3. Распаковка архива с lgm в `3rdparty`:
-cd 3rdparty
-unzip 
-
 3. Запуск сборки через CMake:
 ```bash
 cmake . && make
