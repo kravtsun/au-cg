@@ -1,7 +1,3 @@
-//
-// Created by kravtsun on 05.11.17.
-//
-
 #ifndef FRACTAL_TEXTURE_LOADER_H
 #define FRACTAL_TEXTURE_LOADER_H
 
