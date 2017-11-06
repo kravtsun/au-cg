@@ -11,7 +11,9 @@ uniform mat4 MVP;
 uniform int iterations;
 uniform float abs_lim2;
 uniform vec2 center;
-uniform float scale;
+//uniform float scale;
+uniform float scale_x;
+uniform float scale_y;
 
 float complex_abs2(vec2 z) {
     return z.x * z.x + z.y * z.y;
@@ -34,7 +36,7 @@ vec2 complex_multiply(vec2 lhs, vec2 rhs) {
 void main() {
     // Output position of the vertex, in clip space : MVP * position
     gl_Position =  MVP * vec4(vertexPosition_modelspace, 1, 1);
-	vec2 pos = center + scale * gl_Position.xy;
+	vec2 pos = center + vec2(scale_x * gl_Position.x, scale_y * gl_Position.y);
     vec2 z = vec2(0, 0);
     int it = 0;
     while (it < iterations && complex_abs2(z) < abs_lim2) {

@@ -55,7 +55,9 @@ void init_glew()
 
 GLuint program_id;
 GLuint vertexbuffer;
-GLuint matrix_id, iterations_id, abs_lim_id, center_id, scale_id;
+GLuint matrix_id, iterations_id, abs_lim_id, center_id;
+//GLuint scale_id;
+GLuint scale_x_id, scale_y_id;
 GLuint texture_id;
 GLuint vertex_array_id;
 
@@ -73,7 +75,9 @@ void init_gl()
 
 	center_id = glGetUniformLocation(program_id, "center");
 
-	scale_id = glGetUniformLocation(program_id, "scale");
+	//scale_id = glGetUniformLocation(program_id, "scale");
+	scale_x_id = glGetUniformLocation(program_id, "scale_x");
+	scale_y_id = glGetUniformLocation(program_id, "scale_y");
 
 	// Load texture.
 	const GLuint texture = GrayscaleTextureLoader(256).get_texture();
@@ -105,19 +109,51 @@ glm::vec2 center;
 GLfloat scale = 1.0;
 GLfloat scale_delta_multiplier = 1.1f;
 
+static double get_scale_x()
+{
+	if (win_height > win_width)
+	{
+		return scale;
+	}
+	return scale * static_cast<double>(win_width) / win_height;
+}
+
+static double get_scale_y()
+{
+	if (win_height > win_width)
+	{
+		return scale * static_cast<double>(win_height) / win_width;
+	}
+	return scale;
+}
+
+
+static double get_x_delta()
+{
+	return 2.0 / win_width;
+}
+
+static double get_y_delta()
+{
+	return 2.0 / win_height;
+}
+
 void paint_gl()
 {
 	const GLsizei npts = win_width * win_height;
 	GLfloat *points = new GLfloat[2 * npts];
 
-	for (int i = 0; i < npts; ++i) {
-		auto y = static_cast<GLfloat>(i / win_width) / win_height;
-		auto x = static_cast<GLfloat>(i % win_width) / win_width;
-		points[2 * i + 0] = -1.0f + 2 * x;
-		points[2 * i + 1] = -1.0f + 2 * y;
+	for (int y = 0; y < win_height; ++y)
+	{
+		for (int x = 0; x < win_width; ++x)
+		{
+			const int i = y * win_width + x;
+			points[2 * i + 0] = -1.0f + x * get_x_delta();
+			points[2 * i + 1] = -1.0f + y * get_y_delta();
+		}
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 2 * npts * sizeof(GLfloat), points, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 2 * npts * sizeof(GLfloat), points, GL_STREAM_DRAW);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -148,7 +184,9 @@ void paint_gl()
 	glUniform1i(iterations_id, iterations);
 	glUniform1f(abs_lim_id, abs_lim);
 	glUniform2f(center_id, center.x, center.y);
-	glUniform1f(scale_id, scale);
+	glUniform1f(scale_x_id, get_scale_x());
+	glUniform1f(scale_y_id, get_scale_y());
+	//glUniform1f(scale_id, scale);
 
 	glDrawArrays(GL_POINTS, 0, npts);
 	glDisableVertexAttribArray(0);
@@ -222,14 +260,12 @@ void glfw_mouse_pos_callback(GLFWwindow *_window, double xpos, double ypos)
 		if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 		{
 			auto pos_delta = cur_pos - mouse_pos;
-			pos_delta.x *= -2 * scale / win_width;
-			pos_delta.y *= 2 * scale / win_height;
+			pos_delta.x *= -get_scale_x() * get_x_delta();
+			pos_delta.y *= get_scale_y() * get_y_delta();
 			center += pos_delta;
 		}
 	}
 	mouse_pos = glm::vec2(static_cast<GLfloat>(xpos), static_cast<GLfloat>(ypos));
-	
-	//std::cout << mouse_pos.x << "," << mouse_pos.y << std::endl;
 }
 
 //*@param[in] window The window that received the event.
