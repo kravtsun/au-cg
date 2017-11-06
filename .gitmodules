@@ -2,6 +2,3 @@
 	path = 3rdparty/AntTweakBar
 	url = git@github.com:tschw/AntTweakBar.git
 
-[submodule "3rdparty/glm"]
-	path = 3rdparty/glm
-    url = git@github.com:g-truc/glm.git

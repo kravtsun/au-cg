@@ -10,8 +10,13 @@ find_package(glfw3 3.1.2 REQUIRED)
 add_subdirectory(../3rdparty/AntTweakBar ../3rdparty/AntTweakBar/lib)
 set_target_properties(AntTweakBar PROPERTIES LINKER_LANGUAGE CXX)
 
-add_subdirectory(../3rdparty/glm ../3rdparty/glm/include)
-
+add_custom_command(
+    OUTPUT ../3rdparty/glm
+    COMMAND unzip glm-0.9.8.5.zip
+    DEPENDS ../3rdparty/glm-0.9.8.5.zip
+    WORKING_DIRECTORY ../3rdparty
+    COMMENT "Unpacking glm"
+)
 
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
 
@@ -19,6 +24,7 @@ add_executable(fractal ${SOURCE_FILES}
     texture.fsh
     transform.vsh
 )
+
 
 include_directories(src ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 

@@ -1,7 +1,3 @@
-
-Прежде всего необходима загрузка подмодулей репозитория:
-
-
 # Запуск на Ubuntu 16.04
 
 1. Установка зависимостей
@@ -13,6 +9,10 @@ sudo apt-get install libglew-dev libglfw3
 ```bash
 git submodule update --recursive --remote .
 ```
+
+3. Распаковка архива с lgm в `3rdparty`:
+cd 3rdparty
+unzip 
 
 3. Запуск сборки через CMake:
 ```bash
