@@ -11,7 +11,6 @@ uniform mat4 MVP;
 uniform int iterations;
 uniform float abs_lim2;
 uniform vec2 center;
-//uniform float scale;
 uniform float scale_x;
 uniform float scale_y;
 
