@@ -3,47 +3,33 @@
 
 #include <GL/glew.h>
 #include <glm/vec2.hpp>
+#include "points.h"
 
 class GLFWWindowManager;
 
 class GLHolder
 {
 public:
-	explicit GLHolder(GLFWWindowManager* window_manager);
+	explicit GLHolder(PointTransformer *point_transformer);
 
 	void paint() const;
 
-	void change_center_with_mouse_move(glm::dvec2 pos_delta);
-
 	virtual ~GLHolder();
 	
-	glm::dvec2 get_scale() const;
-	
-	// center in shader coordinates.
-	glm::dvec2 center;
 public:
 	// uniform variables are stored in properties.
 	// TODO code more comfortable variable storage, i.e. in (name, type, reference) tuples.
 	GLuint iterations = 100;
 	GLfloat abs_lim = 10.0f;
-	GLfloat scale = 1.0;
 	
 private:
-	GLFWWindowManager *window_manager_;
-
+	PointTransformer *point_transformer_;
+	
 	GLuint program_id;
 	GLuint vertexbuffer;
-	GLuint matrix_id, iterations_id, abs_lim_id, center_id;
-	GLuint scale_x_id, scale_y_id;
+	GLint matrix_id, iterations_id, abs_lim_id, center_id;
+	GLint scale_x_id, scale_y_id;
 	GLuint texture_id;
 	GLuint vertex_array_id;
-
-	double get_scale_x() const;
-
-	double get_scale_y() const;
-
-	double get_x_delta() const;
-
-	double get_y_delta() const;
 };
 #endif // GL_HOLDER_H

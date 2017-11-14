@@ -21,11 +21,10 @@ add_executable(fractal
         ${SOURCE_FILES}
         texture.fsh
         transform.vsh
-        )
+        src/points.cpp src/points.h)
 
 include_directories(src ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 
 target_link_libraries(fractal -lGLEW -lGLU -lGL)
 target_link_libraries(fractal glfw)
 target_link_libraries(fractal AntTweakBar)
-    

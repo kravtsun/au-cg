@@ -6,7 +6,7 @@
 #include "texture_loader.h"
 #include "shader.hpp"
 
-GLHolder::GLHolder(GLFWWindowManager* window_manager) : window_manager_(window_manager)
+GLHolder::GLHolder(PointTransformer *point_transformer) : point_transformer_(point_transformer)
 {
 	// Create and compile our GLSL program from the shaders
 	program_id = load_shaders("transform.vsh", "texture.fsh");
@@ -48,22 +48,11 @@ GLHolder::GLHolder(GLFWWindowManager* window_manager) : window_manager_(window_m
 
 void GLHolder::paint() const
 {
-	const int win_height = window_manager_->win_height();
-	const int win_width = window_manager_->win_width();
-	const GLsizei npts = win_width * win_height;
-	GLfloat* points = new GLfloat[2 * npts];
+	auto points = point_transformer_->get_points();
+	auto npts = static_cast<const int>(points.size());
 
-	for (int y = 0; y < win_height; ++y)
-	{
-		for (int x = 0; x < win_width; ++x)
-		{
-			const int i = y * win_width + x;
-			points[2 * i + 0] = -1.0f + x * get_x_delta();
-			points[2 * i + 1] = -1.0f + y * get_y_delta();
-		}
-	}
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-	glBufferData(GL_ARRAY_BUFFER, 2 * npts * sizeof(GLfloat), points, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 2 * npts * sizeof(GLfloat), &points[0], GL_STREAM_DRAW);
 
 	// 1rst attribute buffer : vertices
 	glEnableVertexAttribArray(0);
@@ -93,20 +82,14 @@ void GLHolder::paint() const
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
 	glUniform1i(iterations_id, iterations);
 	glUniform1f(abs_lim_id, abs_lim);
-	glUniform2f(center_id, center.x, center.y);
-	glUniform1f(scale_x_id, get_scale_x());
-	glUniform1f(scale_y_id, get_scale_y());
+	glm::dvec2 center = point_transformer_->get_center();
+	glUniform2f(center_id, static_cast<GLfloat>(center.x), static_cast<GLfloat>(center.y));
+	glm::dvec2 scale = point_transformer_->get_scale();
+	glUniform1f(scale_x_id, static_cast<GLfloat>(scale.x));
+	glUniform1f(scale_y_id, static_cast<GLfloat>(scale.y));
 
 	glDrawArrays(GL_POINTS, 0, npts);
 	glDisableVertexAttribArray(0);
-	delete[]points;
-}
-
-void GLHolder::change_center_with_mouse_move(glm::dvec2 pos_delta)
-{
-	pos_delta.x *= -get_scale_x() * get_x_delta();
-	pos_delta.y *= get_scale_y() * get_y_delta();
-	center += pos_delta;
 }
 
 GLHolder::~GLHolder()
@@ -116,40 +99,4 @@ GLHolder::~GLHolder()
 	glDeleteProgram(program_id);
 	glDeleteTextures(1, &texture_id);
 	glDeleteVertexArrays(1, &vertex_array_id);
-}
-
-glm::dvec2 GLHolder::get_scale() const {
-	return glm::dvec2(get_scale_x(), get_scale_y());
-}
-
-inline double GLHolder::get_scale_x() const
-{
-	const int win_height = window_manager_->win_height();
-	const int win_width = window_manager_->win_width();
-	if (win_height > win_width)
-	{
-		return scale;
-	}
-	return scale * static_cast<double>(win_width) / win_height;
-}
-
-inline double GLHolder::get_scale_y() const
-{
-	const int win_height = window_manager_->win_height();
-	const int win_width = window_manager_->win_width();
-	if (win_height > win_width)
-	{
-		return scale * static_cast<double>(win_height) / win_width;
-	}
-	return scale;
-}
-
-inline double GLHolder::get_x_delta() const
-{
-	return 2.0 / window_manager_->win_width();
-}
-
-inline double GLHolder::get_y_delta() const
-{
-	return 2.0 / window_manager_->win_height();
 }

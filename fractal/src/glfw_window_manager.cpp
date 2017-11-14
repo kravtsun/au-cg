@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-GLFWWindowManager::GLFWWindowManager(const std::string win_name, const int win_width, const int win_height):
+GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_width, const int win_height):
 	win_name_(win_name)
 	, win_width_(win_width)
 	, win_height_(win_height)

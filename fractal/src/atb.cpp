@@ -1,11 +1,11 @@
 #include "atb.h"
 #include <iostream>
-#include <stdexcept>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <AntTweakBar.h>
 
 #include "glfw_window_manager.h"
+#include "points.h"
 #include "gl_holder.h"
 
 namespace atb {
@@ -20,7 +20,7 @@ namespace atb {
 	namespace impl {
 		static TwBar *myBar;
 		static GLFWWindowManager *window_manager;
-		static GLHolder *gl_holder;
+		static PointTransformer *point_transfomer;
 		//*  @param[in] window The window that received the event.
 		//*  @param[in] button The[mouse button](@ref buttons) that was pressed or released.
 		//*  @param[in] action One of `GLFW_PRESS` or `GLFW_RELEASE`.
@@ -38,7 +38,7 @@ namespace atb {
 				const glm::dvec2 cur_pos{ xpos, ypos };
 				if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
 				{
-					gl_holder->change_center_with_mouse_move(cur_pos - mouse_pos);
+					point_transfomer->change_center_with_mouse_move(cur_pos - mouse_pos);
 				}
 			}
 			mouse_pos = glm::vec2(xpos, ypos);
@@ -57,28 +57,8 @@ namespace atb {
 				assert(xoffset == 0.0);
 				assert(scale_delta_multiplier > 1);
 				
-				const glm::dvec2 win_size{window_manager->win_width(), window_manager->win_height()};
-				
-				// x,y \in [-1.0; 1.0]
-				auto normalized_mouse_pos = (2.0 * mouse_pos - win_size) / win_size;
-				auto old_mouse_pos_on_shader = gl_holder->center + gl_holder->get_scale() * normalized_mouse_pos;
-				
-				if (yoffset < 0)
-				{
-					gl_holder->scale *= scale_delta_multiplier;
-				}
-				else if (yoffset > 0)
-				{
-					gl_holder->scale /= scale_delta_multiplier;
-				}
-				
-				// Centering mouse_position for scaling.
-				auto new_mouse_pos_on_shader = gl_holder->center + gl_holder->get_scale() * normalized_mouse_pos;
-
-				auto center_bias = old_mouse_pos_on_shader - new_mouse_pos_on_shader;
-				center_bias.y *= -1; // compensating different y direction on shader and in our window.
-				
-				gl_holder->center += center_bias;
+				const double multiplier = yoffset < 0 ? scale_delta_multiplier : 1 / scale_delta_multiplier;
+				point_transfomer->multiply_scale(multiplier, mouse_pos);
 			}
 		}
 
@@ -114,10 +94,10 @@ namespace atb {
 		}
 	}
 
-	void init(GLFWWindowManager *window_manager, GLHolder *gl_holder)
+	void init(GLFWWindowManager *window_manager, PointTransformer *point_transformer, GLHolder *gl_holder)
 	{
 		impl::window_manager = window_manager;
-		impl::gl_holder = gl_holder;
+		impl::point_transfomer = point_transformer;
 		int tw_error;
 		auto throw_on_atb_error = [&tw_error](const std::string &probable_cause)
 		{
@@ -139,8 +119,8 @@ namespace atb {
 		tw_error = TwAddVarRW(impl::myBar, "abs_limit", TW_TYPE_FLOAT, &gl_holder->abs_lim, "");
 		throw_on_atb_error("TwAddVarRw(AbsLimit)");
 
-		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_FLOAT, &gl_holder->scale, "");
-		throw_on_atb_error("TwAddVarRO(scale)");
+		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, "");
+		throw_on_atb_error("TwAddVarRw(scale)");
 
 		GLFWwindow *window = window_manager->window();
 		// after GLFW initialization
