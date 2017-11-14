@@ -12,24 +12,35 @@ void PointTransformer::change_center_with_mouse_move(glm::dvec2 pos_delta) {
 	center += pos_delta;
 }
 
-std::vector<Point> PointTransformer::get_points() const {
+const std::vector<Point>& PointTransformer::get_points() const {
+    static int win_height_cached = 0;
+    static int win_width_cached = 0;
+    static std::vector<Point> points_cached;
 	const int win_height = window_manager_->win_height();
 	const int win_width = window_manager_->win_width();
+
+    if (win_width_cached == win_width && win_height_cached == win_height_cached)
+    {
+        return points_cached;
+    }
 	
 	const GLsizei npts = win_width * win_height;
-	std::vector<Point> points;
-	points.reserve((unsigned long) npts);
+	points_cached.resize(static_cast<unsigned long>(npts));
 	
 	for (int y = 0; y < win_height; ++y)
 	{
 		for (int x = 0; x < win_width; ++x)
 		{
-			points.emplace_back(static_cast<GLfloat>(-1.0f + x * get_x_delta()),
-								static_cast<GLfloat>(-1.0f + y * get_y_delta()));
+            const int i = y * win_width + x;
+            points_cached[i] = Point(static_cast<GLfloat>(-1.0f + x * get_x_delta()),
+                static_cast<GLfloat>(-1.0f + y * get_y_delta()));
 		}
 	}
-	assert(points.size() == npts);
-	return points;
+	assert(points_cached.size() == npts);
+
+    win_height_cached = win_height;
+    win_width_cached = win_width;
+	return points_cached;
 }
 
 void PointTransformer::multiply_scale(double scale_delta_multiplier, glm::dvec2 mouse_pos) {

@@ -2,7 +2,6 @@
 #include <GL/glew.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "glfw_window_manager.h"
 #include "texture_loader.h"
 #include "shader.hpp"
 
@@ -48,7 +47,7 @@ GLHolder::GLHolder(PointTransformer *point_transformer) : point_transformer_(poi
 
 void GLHolder::paint() const
 {
-	auto points = point_transformer_->get_points();
+	const auto &points = point_transformer_->get_points();
 	auto npts = static_cast<const int>(points.size());
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);

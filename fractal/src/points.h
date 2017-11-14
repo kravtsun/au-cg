@@ -8,7 +8,7 @@
 template<typename T>
 struct PointT {
 	T x, y;
-	PointT(T x, T y)
+	explicit PointT(T x=0, T y=0)
 			: x(x)
 			, y(y)
 	{}
@@ -28,8 +28,8 @@ public:
 	glm::dvec2 get_scale() const {
 		return glm::dvec2(get_scale_x(), get_scale_y());
 	}
-	
-	std::vector<Point> get_points() const;
+
+    const std::vector<Point>& get_points() const;
 	
 	void multiply_scale(double scale_delta_multiplier, glm::dvec2 mouse_pos);
 

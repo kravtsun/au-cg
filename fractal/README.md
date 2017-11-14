@@ -15,7 +15,6 @@ git submodule update --recursive --remote .
 cmake . && make
 ```
 
-
 # Запуск на Windows 10
 
 1. Установка зависимостей:
@@ -28,5 +27,5 @@ cmake . && make
 
     * AntTweakBar - распаковать архив `3rdparty/AntTweakBar_116.zip` в `3rdparty`.
 
-2. Построить проект Visual Studio 2015.
+2. Построить проект Visual Studio 2015. Рекомендуется использовать релизную сборку. 
 

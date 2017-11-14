@@ -2,7 +2,6 @@
 #define GL_HOLDER_H
 
 #include <GL/glew.h>
-#include <glm/vec2.hpp>
 #include "points.h"
 
 class GLFWWindowManager;
@@ -16,7 +15,6 @@ public:
 
 	virtual ~GLHolder();
 	
-public:
 	// uniform variables are stored in properties.
 	// TODO code more comfortable variable storage, i.e. in (name, type, reference) tuples.
 	GLuint iterations = 100;

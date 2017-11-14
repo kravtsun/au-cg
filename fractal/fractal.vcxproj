@@ -162,6 +162,7 @@
     <ClCompile Include="src\glfw_window_manager.cpp" />
     <ClCompile Include="src\gl_holder.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\points.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\texture_loader.cpp" />
   </ItemGroup>
@@ -169,6 +170,7 @@
     <ClInclude Include="src\atb.h" />
     <ClInclude Include="src\glfw_window_manager.h" />
     <ClInclude Include="src\gl_holder.h" />
+    <ClInclude Include="src\points.h" />
     <ClInclude Include="src\shader.hpp" />
     <ClInclude Include="src\texture_loader.h" />
   </ItemGroup>
