@@ -118,6 +118,10 @@ GLHolder::~GLHolder()
 	glDeleteVertexArrays(1, &vertex_array_id);
 }
 
+glm::dvec2 GLHolder::get_scale() const {
+	return glm::dvec2(get_scale_x(), get_scale_y());
+}
+
 inline double GLHolder::get_scale_x() const
 {
 	const int win_height = window_manager_->win_height();

@@ -16,7 +16,11 @@ public:
 	void change_center_with_mouse_move(glm::dvec2 pos_delta);
 
 	virtual ~GLHolder();
-
+	
+	glm::dvec2 get_scale() const;
+	
+	// center in shader coordinates.
+	glm::dvec2 center;
 public:
 	// uniform variables are stored in properties.
 	// TODO code more comfortable variable storage, i.e. in (name, type, reference) tuples.
@@ -33,8 +37,6 @@ private:
 	GLuint scale_x_id, scale_y_id;
 	GLuint texture_id;
 	GLuint vertex_array_id;
-
-	glm::vec2 center;
 
 	double get_scale_x() const;
 

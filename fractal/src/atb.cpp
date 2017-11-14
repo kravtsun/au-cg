@@ -1,4 +1,5 @@
 #include "atb.h"
+#include <iostream>
 #include <stdexcept>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -8,6 +9,14 @@
 #include "gl_holder.h"
 
 namespace atb {
+	template<typename T>
+	static void debug_point(const glm::tvec2<T> &p, const std::string &debug_string) {
+		if (!debug_string.empty()) {
+			std::cout << debug_string << " = ";
+		}
+		std::cout << p.x << ' ' << p.y << std::endl;
+	}
+	
 	namespace impl {
 		static TwBar *myBar;
 		static GLFWWindowManager *window_manager;
@@ -47,6 +56,13 @@ namespace atb {
 			{
 				assert(xoffset == 0.0);
 				assert(scale_delta_multiplier > 1);
+				
+				const glm::dvec2 win_size{window_manager->win_width(), window_manager->win_height()};
+				
+				// x,y \in [-1.0; 1.0]
+				auto normalized_mouse_pos = (2.0 * mouse_pos - win_size) / win_size;
+				auto old_mouse_pos_on_shader = gl_holder->center + gl_holder->get_scale() * normalized_mouse_pos;
+				
 				if (yoffset < 0)
 				{
 					gl_holder->scale *= scale_delta_multiplier;
@@ -55,6 +71,14 @@ namespace atb {
 				{
 					gl_holder->scale /= scale_delta_multiplier;
 				}
+				
+				// Centering mouse_position for scaling.
+				auto new_mouse_pos_on_shader = gl_holder->center + gl_holder->get_scale() * normalized_mouse_pos;
+
+				auto center_bias = old_mouse_pos_on_shader - new_mouse_pos_on_shader;
+				center_bias.y *= -1; // compensating different y direction on shader and in our window.
+				
+				gl_holder->center += center_bias;
 			}
 		}
 
