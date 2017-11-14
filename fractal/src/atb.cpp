@@ -121,6 +121,12 @@ namespace atb {
 
 		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, "");
 		throw_on_atb_error("TwAddVarRw(scale)");
+		
+		tw_error = TwAddVarRW(impl::myBar, "center.x", TW_TYPE_DOUBLE, &point_transformer->center.x, "");
+		throw_on_atb_error("TwAddVarRw(center.x)");
+		
+		tw_error = TwAddVarRW(impl::myBar, "center.y", TW_TYPE_DOUBLE, &point_transformer->center.y, "");
+		throw_on_atb_error("TwAddVarRw(center.y)");
 
 		GLFWwindow *window = window_manager->window();
 		// after GLFW initialization

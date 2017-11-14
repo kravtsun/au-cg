@@ -24,24 +24,20 @@ public:
 	
 	void change_center_with_mouse_move(glm::dvec2 pos_delta);
 	
+	// TODO fix name clashing with center field.
 	glm::dvec2 get_scale() const {
 		return glm::dvec2(get_scale_x(), get_scale_y());
 	}
 	
 	std::vector<Point> get_points() const;
 	
-	glm::dvec2 get_center() const {
-		return center;
-	}
-	
 	void multiply_scale(double scale_delta_multiplier, glm::dvec2 mouse_pos);
 
 	double scale = 1.0;
-
-private:
 	// center in shader coordinates.
 	glm::dvec2 center;
-	
+
+private:
 	GLFWWindowManager *window_manager_;
 	
 	double get_scale_x() const;

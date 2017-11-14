@@ -82,9 +82,10 @@ void GLHolder::paint() const
 	glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
 	glUniform1i(iterations_id, iterations);
 	glUniform1f(abs_lim_id, abs_lim);
-	glm::dvec2 center = point_transformer_->get_center();
+	const glm::dvec2 &center = point_transformer_->center;
 	glUniform2f(center_id, static_cast<GLfloat>(center.x), static_cast<GLfloat>(center.y));
-	glm::dvec2 scale = point_transformer_->get_scale();
+	
+	const glm::dvec2 &scale = point_transformer_->get_scale();
 	glUniform1f(scale_x_id, static_cast<GLfloat>(scale.x));
 	glUniform1f(scale_y_id, static_cast<GLfloat>(scale.y));
 
