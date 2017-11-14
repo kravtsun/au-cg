@@ -119,13 +119,13 @@ namespace atb {
 		tw_error = TwAddVarRW(impl::myBar, "abs_limit", TW_TYPE_FLOAT, &gl_holder->abs_lim, "");
 		throw_on_atb_error("TwAddVarRw(AbsLimit)");
 
-		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, "");
+		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, " step=0.02 ");
 		throw_on_atb_error("TwAddVarRw(scale)");
 		
-		tw_error = TwAddVarRW(impl::myBar, "center.x", TW_TYPE_DOUBLE, &point_transformer->center.x, "");
+		tw_error = TwAddVarRW(impl::myBar, "center.x", TW_TYPE_DOUBLE, &point_transformer->center.x, " step=0.02 ");
 		throw_on_atb_error("TwAddVarRw(center.x)");
 		
-		tw_error = TwAddVarRW(impl::myBar, "center.y", TW_TYPE_DOUBLE, &point_transformer->center.y, "");
+		tw_error = TwAddVarRW(impl::myBar, "center.y", TW_TYPE_DOUBLE, &point_transformer->center.y, " step=0.02 ");
 		throw_on_atb_error("TwAddVarRw(center.y)");
 
 		GLFWwindow *window = window_manager->window();
