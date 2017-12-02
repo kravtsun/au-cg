@@ -1,0 +1,3 @@
+[submodule "3rdparty/AntTweakBar"]
+	path = 3rdparty/AntTweakBar
+	url = git@github.com:kravtsun/AntTweakBar.git
