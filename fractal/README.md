@@ -14,18 +14,3 @@ git submodule update --recursive --remote .
 ```bash
 cmake . && make
 ```
-
-# Запуск на Windows 10
-
-1. Установка зависимостей:
-
-    * GLEW - согласно [инструкциям на сайте](http://glew.sourceforge.net/install.html)
-
-    * GLFW - распаковать архив `3rdparty/glfw-3.2.1.bin.WIN64.zip` в `3rdparty`
-
-    * GLM - распаковать архив `3rdparty/glm-0.9.8.5.zip` в `3rdparty`.
-
-    * AntTweakBar - распаковать архив `3rdparty/AntTweakBar_116.zip` в `3rdparty`.
-
-2. Построить проект Visual Studio 2015. Рекомендуется использовать релизную сборку. 
-
