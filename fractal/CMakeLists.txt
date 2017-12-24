@@ -14,7 +14,10 @@ add_custom_command(
 add_subdirectory(../3rdparty/AntTweakBar ../3rdparty/AntTweakBar/lib)
 set_target_properties(AntTweakBar PROPERTIES LINKER_LANGUAGE CXX)
 
+
+AUX_SOURCE_DIRECTORY(../common/ COMMON_FILES)
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} )
 
 add_executable(fractal
         ../3rdparty/glm
@@ -23,7 +26,7 @@ add_executable(fractal
         transform.vsh
         src/points.cpp src/points.h)
 
-include_directories(src ../3rdparty/AntTweakBar/include ../3rdparty/glm)
+include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 
 target_link_libraries(fractal -lGLEW -lGLU -lGL)
 target_link_libraries(fractal glfw)
