@@ -22,7 +22,7 @@ glm::mat4 getProjectionMatrix(){
 
 // Initial position : on +Z
 //glm::vec3 position = glm::vec3(0, 0, 5);
-glm::vec3 position = glm::vec3(-3.320067, -0.149043, 5);
+glm::vec3 position = glm::vec3(-4.362360, 1.444663, 5);
 
 // Initial horizontal angle : toward -Z
 //float horizontalAngle = static_cast<float>(M_PI);
@@ -95,6 +95,8 @@ void computeMatricesFromInputs(GLFWwindow *window) {
 	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS){
 		position -= right * deltaTime * move_speed;
 	}
+    
+//    printf("position = (%lf, %lf, %lf)\n", position.x, position.y, position.z);
 
 	float FoV = initialFoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
 

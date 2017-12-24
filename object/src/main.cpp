@@ -6,190 +6,196 @@
 #include <assimp/postprocess.h>     // Post processing flags
 #include <shader.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <utility>
 
 #include "glfw_window_manager.h"
 #include "controls.hpp"
 #include "texture.hpp"
 
-bool loadAssImp(
-        const char * path,
-        std::vector<unsigned short> & indices,
-        std::vector<glm::vec3> & vertices,
-        std::vector<glm::vec2> & uvs,
-        std::vector<glm::vec3> & normals
-)
-{
-    Assimp::Importer importer;
-    
-    const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-    if( !scene) {
-        throw std::logic_error(importer.GetErrorString());
-    }
-    const aiMesh* mesh = scene->mMeshes[0]; // In this simple example code we always use the 1rst mesh (in OBJ files there is often only one anyway)
-    
-    // Fill vertices positions
-    vertices.reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-        aiVector3D pos = mesh->mVertices[i];
-        vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
-    }
-    
-    // Fill vertices texture coordinates
-    uvs.reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-        aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
-        uvs.push_back(glm::vec2(UVW.x, UVW.y));
-    }
-    
-    // Fill vertices normals
-    normals.reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-        aiVector3D n = mesh->mNormals[i];
-        normals.push_back(glm::vec3(n.x, n.y, n.z));
-    }
-    
-    // Fill face indices
-    indices.reserve(3*mesh->mNumFaces);
-    for (unsigned int i=0; i<mesh->mNumFaces; i++){
-        // Assume the model has only triangles.
-        indices.push_back(mesh->mFaces[i].mIndices[0]);
-        indices.push_back(mesh->mFaces[i].mIndices[1]);
-        indices.push_back(mesh->mFaces[i].mIndices[2]);
-    }
-    
-    // The "scene" pointer will be deleted automatically by "importer"
-    return true;
-}
+#define all(x) (x).begin(), (x).end()
 
-bool loadOBJ(
-        const char * path,
-        std::vector<glm::vec3> & out_vertices,
-        std::vector<glm::vec2> & out_uvs,
-        std::vector<glm::vec3> & out_normals
-){
-    printf("Loading OBJ file %s...\n", path);
-    
-    std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-    std::vector<glm::vec3> temp_vertices;
-    std::vector<glm::vec2> temp_uvs;
-    std::vector<glm::vec3> temp_normals;
-    
-    
-    FILE * file = fopen(path, "r");
-    if( file == NULL ){
-        printf("Impossible to open the file ! Are you in the right path ? See Tutorial 1 for details\n");
-        getchar();
-        return false;
-    }
-    
-    while( 1 ){
-        
-        char lineHeader[128];
-        // read the first word of the line
-        int res = fscanf(file, "%s", lineHeader);
-        if (res == EOF)
-            break; // EOF = End Of File. Quit the loop.
-        
-        // else : parse lineHeader
-        
-        if ( strcmp( lineHeader, "v" ) == 0 ){
-            glm::vec3 vertex;
-            fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z );
-            temp_vertices.push_back(vertex);
-        }else if ( strcmp( lineHeader, "vt" ) == 0 ){
-            glm::vec2 uv;
-            fscanf(file, "%f %f\n", &uv.x, &uv.y );
-            uv.y = -uv.y; // Invert V coordinate since we will only use DDS texture, which are inverted. Remove if you want to use TGA or BMP loaders.
-            temp_uvs.push_back(uv);
-        }else if ( strcmp( lineHeader, "vn" ) == 0 ){
-            glm::vec3 normal;
-            fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z );
-            temp_normals.push_back(normal);
-        }else if ( strcmp( lineHeader, "f" ) == 0 ){
-            std::string vertex1, vertex2, vertex3;
-            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-            int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
-            if (matches != 9){
-                printf("File can't be read by our simple parser :-( Try exporting with other options\n");
-                fclose(file);
-                return false;
-            }
-            vertexIndices.push_back(vertexIndex[0]);
-            vertexIndices.push_back(vertexIndex[1]);
-            vertexIndices.push_back(vertexIndex[2]);
-            uvIndices    .push_back(uvIndex[0]);
-            uvIndices    .push_back(uvIndex[1]);
-            uvIndices    .push_back(uvIndex[2]);
-            normalIndices.push_back(normalIndex[0]);
-            normalIndices.push_back(normalIndex[1]);
-            normalIndices.push_back(normalIndex[2]);
-        }else{
-            // Probably a comment, eat up the rest of the line
-            char stupidBuffer[1000];
-            fgets(stupidBuffer, 1000, file);
-        }
-        
-    }
-    
-    // For each vertex of each triangle
-    for( unsigned int i=0; i<vertexIndices.size(); i++ ){
-        
-        // Get the indices of its attributes
-        unsigned int vertexIndex = vertexIndices[i];
-        unsigned int uvIndex = uvIndices[i];
-        unsigned int normalIndex = normalIndices[i];
-        
-        // Get the attributes thanks to the index
-        glm::vec3 vertex = temp_vertices[ vertexIndex-1 ];
-        glm::vec2 uv = temp_uvs[ uvIndex-1 ];
-        glm::vec3 normal = temp_normals[ normalIndex-1 ];
-        
-        // Put the attributes in buffers
-        out_vertices.push_back(vertex);
-        out_uvs     .push_back(uv);
-        out_normals .push_back(normal);
-        
-    }
-    fclose(file);
-    return true;
-}
+GLuint program_id;
+GLint matrix_id, view_matrix_id, model_matrix_id;
+GLint diffuse_color_id, ambient_color_id, specular_color_id;
+GLint ka_id, kd_id, ks_id, shiness_id;
+GLuint vertex_array_id;
+GLuint vertexbuffer;
+std::shared_ptr<GLFWWindowManager> window_manager;
+GLuint normalbuffer;
 
-
-//struct Model {
+struct Model {
+    static std::vector<glm::vec3> all_vertices;
+    static std::vector<glm::vec3> all_normals;
+    static constexpr float rotation_step = 0.05f;
     std::vector<unsigned short> indices;
     std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> uvs;
-    std::vector<glm::vec3> normals; // Won't be used at the moment.
+    std::vector<glm::vec3> normals;
     
-//    explicit Model(const std::string &filename) {
-    void loadObj(const std::string &filename) {
-//        bool res = loadAssImp(filename.c_str(), indices, vertices, uvs, normals);
-        bool res = loadOBJ(filename.c_str(), vertices, uvs, normals);
-        if (!res) {
-            throw std::logic_error("Failed to load image from file: " + filename);
+    size_t all_vertices_offset = 0;
+    size_t all_normals_offset = 0;
+    
+    glm::mat4x4 model_matrix = glm::mat4(1.0);
+    
+    glm::vec3 diffuse_color = glm::vec3(0);
+    glm::vec3 ambient_color = glm::vec3(0);
+    glm::vec3 specular_color = glm::vec3(0);
+    
+//    float Ka;   // Ambient reflection coefficient
+//    float Kd;   // Diffuse reflection coefficient
+//    float Ks;   // Specular reflection coefficient
+//    float shininessVal; // Shininess
+
+    explicit Model(const aiMesh* mesh, const aiMaterial* material) {
+        vertices.reserve(mesh->mNumVertices);
+        for(auto i = 0; i < mesh->mNumVertices; i++){
+            aiVector3D pos = mesh->mVertices[i];
+            vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
         }
+        //    // Fill vertices texture coordinates
+        //    uvs.reserve(mesh->mNumVertices);
+        //    for(unsigned int i=0; i<mesh->mNumVertices; i++){
+        //        aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
+        //        uvs.push_back(glm::vec2(UVW.x, UVW.y));
+        //    }
+    
+        // Fill vertices normals
+        normals.reserve(mesh->mNumVertices);
+        for(unsigned int i=0; i<mesh->mNumVertices; i++){
+            aiVector3D n = mesh->mNormals[i];
+            normals.push_back(glm::vec3(n.x, n.y, n.z));
+        }
+    
+        // Fill face indices
+        indices.reserve(3*mesh->mNumFaces);
+        for (unsigned int i=0; i<mesh->mNumFaces; i++){
+            // Assume the model has only triangles.
+            indices.push_back(mesh->mFaces[i].mIndices[0]);
+            indices.push_back(mesh->mFaces[i].mIndices[1]);
+            indices.push_back(mesh->mFaces[i].mIndices[2]);
+        }
+    
+        all_vertices_offset = all_vertices.size();
+        all_normals_offset = all_normals.size();
+        std::copy(all(vertices), std::back_inserter(all_vertices));
+        std::copy(all(normals), std::back_inserter(all_normals));
+        
+//        for (int i = 0; i < material->mNumProperties; ++i) {
+            aiColor4D color;
+            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color)) {
+                assert(color.a == 1.0);
+                diffuse_color = glm::vec3(color.r, color.g, color.b);
+            }
+    
+            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color)) {
+                assert(color.a == 1.0);
+                ambient_color = glm::vec3(color.r, color.g, color.b);
+            }
+    
+            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color)) {
+                assert(color.a == 1.0);
+                specular_color = glm::vec3(color.r, color.g, color.b);
+            }
+            
+//            if (AI_SUCCESS == aiGetMaterialFloat(material, AI_MATKEY_AMBIENT))
+            // Defines the shininess of a phong-shaded material. This is actually the exponent of the phong specular equation
+//        }
+    }
+
+    virtual void step() {}
+    
+    size_t size() const {
+        return vertices.size();
+    }
+    
+    virtual ~Model() {
+    }
+};
+
+std::vector<glm::vec3> Model::all_vertices;
+std::vector<glm::vec3> Model::all_normals;
+
+struct RotatedModel : public Model {
+    RotatedModel(const aiMesh *mesh, const aiMaterial* material) : Model(mesh, material) {}
+    
+    void step() override {
+        Model::step();
+        model_matrix = glm::rotate(model_matrix, rotation_step, glm::vec3(0.0, 1.0, 0.0));
+    }
+};
+
+struct Scene {
+    std::vector<std::shared_ptr<Model>> models;
+    
+    explicit Scene() = default;
+    
+    explicit Scene(const std::string &path) {
+        Assimp::Importer importer;
+    
+        const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
+        if( !scene) {
+            throw std::logic_error(importer.GetErrorString());
+        }
+    
+        for (int imesh = 0; imesh < scene->mNumMeshes; ++imesh) {
+            const aiMesh* mesh = scene->mMeshes[imesh];
+            const aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+            std::shared_ptr<Model> model_ptr;
+//            if (mesh->mName == aiString("suzanne")) {
+//            if (strstr("bunny", mesh->mName.C_Str()) != NULL) {
+            if (mesh->mNumVertices > 30000) {
+                model_ptr = std::make_shared<RotatedModel>(mesh, material);
+            } else {
+                model_ptr = std::make_shared<Model>(mesh, material);
+            }
+            if (model_ptr)
+            models.emplace_back(model_ptr);
+        }
+    
+        glGenBuffers(1, &vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, Model::all_vertices.size() * sizeof(glm::vec3), &Model::all_vertices[0], GL_STATIC_DRAW);
+    
+        glGenBuffers(1, &normalbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+        glBufferData(GL_ARRAY_BUFFER, Model::all_normals.size() * sizeof(glm::vec3), &Model::all_normals[0], GL_STATIC_DRAW);
+    }
+    
+};
+
+std::shared_ptr<Scene> scene;
+
+// TODO RotationModel.
+
+struct Light {
+    explicit Light(GLuint program_id)
+            : program_id(program_id)
+    {
+        glUseProgram(program_id);
+        position_id = glGetUniformLocation(program_id, "lightPos");
+        color_id = glGetUniformLocation(program_id, "lightColor");
     }
     
     void step() {
     }
-//};
+    
+    glm::vec3 getPosition() const {
+        return glm::vec3(4, 4, 4);
+    }
+    
+    glm::vec3 getColor() const {
+        return glm::vec3(1.0, 1.0, 1.0);
+    }
+    
+    // TODO make static.
+    GLint position_id, color_id;
+    const GLuint program_id;
+};
 
-GLuint program_id;
-GLint matrix_id, view_matrix_id, model_matrix_id;
-
-GLuint vertex_array_id;
-GLuint vertexbuffer;
-std::shared_ptr<GLFWWindowManager> window_manager;
-GLuint texture;
-GLint texture_id;
-GLuint uvbuffer;
-GLuint normalbuffer;
-
-GLint LightID;
+std::vector<Light> lights;
 
 static void init() {
     // Dark blue background
-    glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+    glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
     
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
@@ -212,29 +218,20 @@ static void init() {
     view_matrix_id = glGetUniformLocation(program_id, "V");
     model_matrix_id = glGetUniformLocation(program_id, "M");
     
-    // Load the texture
-    texture = loadDDS("uvmap.DDS");
+    diffuse_color_id = glGetUniformLocation(program_id, "diffuse_color");
+    ambient_color_id = glGetUniformLocation(program_id, "ambient_color");
+    specular_color_id = glGetUniformLocation(program_id, "specular_color");
     
-    // Get a handle for our "myTextureSampler" uniform
-    texture_id = glGetUniformLocation(program_id, "myTextureSampler");
+//    ka_id = glGetUniformLocation(program_id, "Ka");
+//    kd_id = glGetUniformLocation(program_id, "Kd");
+//    ks_id = glGetUniformLocation(program_id, "Ks");
+//    shiness_id = glGetUniformLocation(program_id, "shininessVal");
     
-    loadObj("suzanne.obj");
+    scene = std::make_shared<Scene>("scene.obj");
     
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-    
-    glGenBuffers(1, &uvbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(glm::vec2), &uvs[0], GL_STATIC_DRAW);
-    
-    glGenBuffers(1, &normalbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
-    
-    glUseProgram(program_id);
-    LightID = glGetUniformLocation(program_id, "LightPosition_worldspace");
+    lights.emplace_back(program_id);
 }
+
 
 static void paint() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -243,27 +240,8 @@ static void paint() {
     
     // Compute the mvp matrix from keyboard and mouse input
     computeMatricesFromInputs(window_manager->window());
-    glm::mat4 projection_matrix = getProjectionMatrix();
-    glm::mat4 view_matrix = getViewMatrix();
-    auto eye = glm::mat4(1.0);
-//    glm::mat4 model_matrix = glm::rotate(eye, static_cast<float>(M_PI / 4), glm::vec3(0.0, 1.0, 0.0));
-    glm::mat4 model_matrix = eye;
-//    model_matrix = glm::rotate(model_matrix, static_cast<float>(M_PI / 4), glm::vec3(0.0, 1.0, 0.0));
-//    model_matrix = glm::rotate(model_matrix, static_cast<float>(M_PI / 4), glm::vec3(1.0, 0.0, 0.0));
-    glm::mat4 mvp = projection_matrix * view_matrix * model_matrix;
-    
-    glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
-    glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, &model_matrix[0][0]);
-    glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, &view_matrix[0][0]);
-    
-    glm::vec3 lightPos = glm::vec3(4,4,4);
-    glUniform3f(LightID, lightPos.x, lightPos.y, lightPos.z);
-    
-    // Bind our texture in Texture Unit 0
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    // Set our "myTextureSampler" sampler to use Texture Unit 0
-    glUniform1i(texture_id, 0);
+    const glm::mat4 projection_matrix = getProjectionMatrix();
+    const glm::mat4 view_matrix = getViewMatrix();
     
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -273,47 +251,53 @@ static void paint() {
             GL_FLOAT, // type
             GL_FALSE, // normalized?
             0, // stride
-            static_cast<void*>(nullptr) // array buffer offset
+            static_cast<void *>(nullptr) // array buffer offset
     );
     
-    // 2nd attribute buffer : UVs
     glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glVertexAttribPointer(
-            1,                                // attribute
-            2,                                // size
-            GL_FLOAT,                         // type
-            GL_FALSE,                         // normalized?
-            0,                                // stride
-            (void*)0                          // array buffer offset
-    );
-    
-    // 3rd attribute buffer : normals
-    glEnableVertexAttribArray(2);
     glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
     glVertexAttribPointer(
-            2,                                // attribute
+            1,                                // attribute
             3,                                // size
             GL_FLOAT,                         // type
             GL_FALSE,                         // normalized?
             0,                                // stride
-            (void*)0                          // array buffer offset
+            static_cast<void *>(nullptr)      // array buffer offset
     );
     
-    // Draw the triangle !
-    glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
+    auto const &light = lights.front();
+    auto light_position = light.getPosition();
+
+#define PASS_UNIFORM_3F(value, id) \
+    glUniform3f(id, (value).x, (value).y, (value).z);
     
+    PASS_UNIFORM_3F(light.getPosition(), light.position_id);
+    PASS_UNIFORM_3F(light.getColor(), light.color_id);
+    
+    for (auto const &model : scene->models) {
+        glm::mat4 model_matrix = model->model_matrix;
+        glm::mat4 mvp = projection_matrix * view_matrix * model_matrix;
+    
+        glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
+        glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, &model_matrix[0][0]);
+        glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, &view_matrix[0][0]);
+        
+        PASS_UNIFORM_3F(model->diffuse_color, diffuse_color_id);
+        PASS_UNIFORM_3F(model->ambient_color, ambient_color_id);
+        PASS_UNIFORM_3F(model->specular_color, specular_color_id);
+        
+        glDrawArrays(GL_TRIANGLES, static_cast<GLint>(model->all_vertices_offset),
+                     static_cast<GLsizei>(model->size()));
+        model->step();
+    }
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-    glDisableVertexAttribArray(2);
 }
 
 static void deinit() {
     glDeleteBuffers(1, &vertexbuffer);
-    glDeleteBuffers(1, &uvbuffer);
     glDeleteBuffers(1, &normalbuffer);
     glDeleteProgram(program_id);
-    glDeleteTextures(1, &texture);
     glDeleteVertexArrays(1, &vertex_array_id);
 }
 
