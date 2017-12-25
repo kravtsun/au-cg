@@ -17,11 +17,16 @@
 GLuint program_id;
 GLint matrix_id, view_matrix_id, model_matrix_id;
 GLint diffuse_color_id, ambient_color_id, specular_color_id;
-GLint ka_id, kd_id, ks_id, shiness_id;
+GLint camera_position_id;
+GLint ShadowMapID;
+GLint DepthBiasID;
+
 GLuint vertex_array_id;
 GLuint vertexbuffer;
 std::shared_ptr<GLFWWindowManager> window_manager;
 GLuint normalbuffer;
+
+bool debug_shadowmap = false;
 
 struct Model {
     static std::vector<glm::vec3> all_vertices;
@@ -79,26 +84,23 @@ struct Model {
         std::copy(all(vertices), std::back_inserter(all_vertices));
         std::copy(all(normals), std::back_inserter(all_normals));
         
-//        for (int i = 0; i < material->mNumProperties; ++i) {
-            aiColor4D color;
-            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color)) {
-                assert(color.a == 1.0);
-                diffuse_color = glm::vec3(color.r, color.g, color.b);
-            }
-    
-            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color)) {
-                assert(color.a == 1.0);
-                ambient_color = glm::vec3(color.r, color.g, color.b);
-            }
-    
-            if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color)) {
-                assert(color.a == 1.0);
-                specular_color = glm::vec3(color.r, color.g, color.b);
-            }
-            
-//            if (AI_SUCCESS == aiGetMaterialFloat(material, AI_MATKEY_AMBIENT))
-            // Defines the shininess of a phong-shaded material. This is actually the exponent of the phong specular equation
-//        }
+        aiColor4D color;
+        if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color)) {
+            assert(color.a == 1.0);
+            diffuse_color = glm::vec3(color.r, color.g, color.b);
+        }
+
+        if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color)) {
+            assert(color.a == 1.0);
+            ambient_color = glm::vec3(color.r, color.g, color.b);
+        }
+
+        if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color)) {
+            assert(color.a == 1.0);
+            specular_color = glm::vec3(color.r, color.g, color.b);
+        }
+        
+        ambient_color = 0.1f * diffuse_color;
     }
 
     virtual void step() {}
@@ -173,6 +175,15 @@ struct Light {
         glUseProgram(program_id);
         position_id = glGetUniformLocation(program_id, "lightPos");
         color_id = glGetUniformLocation(program_id, "lightColor");
+    
+        // Compute the MVP matrix from the light's point of view
+        depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
+        depthViewMatrix = glm::lookAt(getPosition(), glm::vec3(0,0,0), glm::vec3(0,1,0));
+        
+        // or, for spot light :
+        //glm::vec3 lightPos(5, 20, 20);
+//        depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
+//        depthViewMatrix = glm::lookAt(getPosition(), getPosition() - getInvDir(), glm::vec3(0, 1, 0));
     }
     
     void step() {
@@ -186,12 +197,30 @@ struct Light {
         return glm::vec3(1.0, 1.0, 1.0);
     }
     
+    glm::vec3 getInvDir() const {
+        return getPosition();
+    }
+    
     // TODO make static.
     GLint position_id, color_id;
     const GLuint program_id;
+    
+    glm::mat4 depthProjectionMatrix;
+    glm::mat4 depthViewMatrix;
 };
 
 std::vector<Light> lights;
+GLuint depthTexture;
+GLuint depthProgramID;
+GLint depthMatrixID;
+
+
+GLuint FramebufferName = 0;
+
+// debuggging:
+GLuint quad_programID;
+GLint texID;
+GLuint quad_vertexbuffer;
 
 static void init() {
     // Dark blue background
@@ -222,18 +251,121 @@ static void init() {
     ambient_color_id = glGetUniformLocation(program_id, "ambient_color");
     specular_color_id = glGetUniformLocation(program_id, "specular_color");
     
-//    ka_id = glGetUniformLocation(program_id, "Ka");
-//    kd_id = glGetUniformLocation(program_id, "Kd");
-//    ks_id = glGetUniformLocation(program_id, "Ks");
-//    shiness_id = glGetUniformLocation(program_id, "shininessVal");
+    camera_position_id = glGetUniformLocation(program_id, "cameraPos");
+    
+    ShadowMapID = glGetUniformLocation(program_id, "shadowMap");
+    DepthBiasID = glGetUniformLocation(program_id, "DepthBiasMVP");
     
     scene = std::make_shared<Scene>("scene.obj");
     
     lights.emplace_back(program_id);
+    
+    // The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
+    glGenFramebuffers(1, &FramebufferName);
+    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+
+    // Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+    glGenTextures(1, &depthTexture);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_DEPTH_COMPONENT16, 1024, 1024, 0,GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+
+    // No color output in the bound framebuffer, only depth.
+    glDrawBuffer(GL_NONE);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        throw std::logic_error("framebuffer is not ok.");
+    }
+
+    depthProgramID = load_shaders("DepthRTT.vert", "DepthRTT.frag");
+
+    // Get a handle for our "MVP" uniform
+    depthMatrixID = glGetUniformLocation(depthProgramID, "depthMVP");
+    
+    if (debug_shadowmap) {
+        // debuggging:
+        // The quad's FBO. Used only for visualizing the shadowmap.
+        static const GLfloat g_quad_vertex_buffer_data[] = {
+                -1.0f, -1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f,
+                1.0f, -1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+        };
+    
+        glGenBuffers(1, &quad_vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+    
+        quad_programID = load_shaders("Passthrough.vertexshader", "SimpleTexture.fragmentshader");
+        texID = glGetUniformLocation(quad_programID, "texture_");
+    }
 }
 
 
+#define PASS_UNIFORM_3F(id, value) \
+    glUniform3f(id, (value).x, (value).y, (value).z);
+
+
+static void renderToFrameBuffer(const Light &light) {
+    // Render to our framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+    glViewport(0, 0, 1024, 1024); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+    
+    // We don't use bias in the shader, but instead we draw back faces,
+    // which are already separated from the front faces by a small distance
+    // (if your geometry is made this way)
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+    
+    // Clear the screen
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    // Use our shader
+    glUseProgram(depthProgramID);
+    
+    // 1rst attribute buffer : vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(
+            0,  // The attribute we want to configure
+            3,                  // size
+            GL_FLOAT,           // type
+            GL_FALSE,           // normalized?
+            0,                  // stride
+            (void*)0            // array buffer offset
+    );
+    
+    for (auto const &model : scene->models) {
+        glm::mat4 model_matrix = model->model_matrix;
+        glm::mat4 depthMVP = light.depthProjectionMatrix * light.depthViewMatrix * model_matrix;
+        
+        glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+        glDrawArrays(GL_TRIANGLES, static_cast<GLint>(model->all_vertices_offset),
+                     static_cast<GLsizei>(model->size()));
+    }
+    
+    glDisableVertexAttribArray(0);
+    
+    // Render to the screen
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0,0, 1024, 768); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK); // Cull back-facing triangles -> draw only front-facing triangles
+}
+
 static void paint() {
+    renderToFrameBuffer(lights.front());
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glUseProgram(program_id);
@@ -242,6 +374,7 @@ static void paint() {
     computeMatricesFromInputs(window_manager->window());
     const glm::mat4 projection_matrix = getProjectionMatrix();
     const glm::mat4 view_matrix = getViewMatrix();
+    PASS_UNIFORM_3F(camera_position_id, getCameraPosition());
     
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -267,24 +400,38 @@ static void paint() {
     
     auto const &light = lights.front();
     auto light_position = light.getPosition();
-
-#define PASS_UNIFORM_3F(value, id) \
-    glUniform3f(id, (value).x, (value).y, (value).z);
     
-    PASS_UNIFORM_3F(light.getPosition(), light.position_id);
-    PASS_UNIFORM_3F(light.getColor(), light.color_id);
+    // Bind our texture in Texture Unit 0
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    // Set our "myTextureSampler" sampler to use Texture Unit 0
+    glUniform1i(ShadowMapID, 0);
+    
+    const glm::mat4 biasMatrix(
+            0.5, 0.0, 0.0, 0.0,
+            0.0, 0.5, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.5, 0.5, 0.5, 1.0
+    );
+    
+    PASS_UNIFORM_3F(light.position_id, light.getPosition());
+    PASS_UNIFORM_3F(light.color_id, light.getColor());
     
     for (auto const &model : scene->models) {
         glm::mat4 model_matrix = model->model_matrix;
         glm::mat4 mvp = projection_matrix * view_matrix * model_matrix;
+        glm::mat4 depthMVP = light.depthProjectionMatrix * light.depthViewMatrix * model_matrix;
+        glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
+        
+        glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasMVP[0][0]);
     
         glUniformMatrix4fv(matrix_id, 1, GL_FALSE, &mvp[0][0]);
         glUniformMatrix4fv(model_matrix_id, 1, GL_FALSE, &model_matrix[0][0]);
         glUniformMatrix4fv(view_matrix_id, 1, GL_FALSE, &view_matrix[0][0]);
         
-        PASS_UNIFORM_3F(model->diffuse_color, diffuse_color_id);
-        PASS_UNIFORM_3F(model->ambient_color, ambient_color_id);
-        PASS_UNIFORM_3F(model->specular_color, specular_color_id);
+        PASS_UNIFORM_3F(diffuse_color_id, model->diffuse_color);
+        PASS_UNIFORM_3F(ambient_color_id, model->ambient_color);
+        PASS_UNIFORM_3F(specular_color_id, model->specular_color);
         
         glDrawArrays(GL_TRIANGLES, static_cast<GLint>(model->all_vertices_offset),
                      static_cast<GLsizei>(model->size()));
@@ -292,6 +439,38 @@ static void paint() {
     }
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+    
+//    if (debug_shadowmap) {
+//        // Optionally render the shadowmap (for debug only)
+//        // Render only on a corner of the window (or we we won't see the real rendering...)
+//        glViewport(0, 0, 512, 512);
+//
+//        // Use our shader
+//        glUseProgram(quad_programID);
+//
+//        // Bind our texture in Texture Unit 0
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, depthTexture);
+//        // Set our "renderedTexture" sampler to use Texture Unit 0
+//        glUniform1i(texID, 0);
+//
+//        // 1rst attribute buffer : vertices
+//        glEnableVertexAttribArray(0);
+//        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+//        glVertexAttribPointer(
+//                0,                  // attribute 0. No particular reason for 0, but must match the layout in the shader.
+//                3,                  // size
+//                GL_FLOAT,           // type
+//                GL_FALSE,           // normalized?
+//                0,                  // stride
+//                (void *) 0            // array buffer offset
+//        );
+//
+//        // Draw the triangle !
+//        // You have to disable GL_COMPARE_R_TO_TEXTURE above in order to see anything !
+//        glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
+//        glDisableVertexAttribArray(0);
+//    }
 }
 
 static void deinit() {
@@ -299,6 +478,17 @@ static void deinit() {
     glDeleteBuffers(1, &normalbuffer);
     glDeleteProgram(program_id);
     glDeleteVertexArrays(1, &vertex_array_id);
+    
+    glDeleteProgram(depthProgramID);
+//    glDeleteTextures(1, &Texture);
+    
+    glDeleteFramebuffers(1, &FramebufferName);
+    glDeleteTextures(1, &depthTexture);
+
+    if (debug_shadowmap) {
+        glDeleteProgram(quad_programID);
+        glDeleteBuffers(1, &quad_vertexbuffer);
+    }
 }
 
 int main() {
