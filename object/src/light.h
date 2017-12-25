@@ -6,32 +6,19 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
+
+#define PASS_UNIFORM_3F(id, value) \
+    glUniform3f(id, (value).x, (value).y, (value).z);
+
+struct Model;
 
 struct Light {
-    explicit Light(GLuint program_id)
-            : program_id(program_id)
-    {
-        glUseProgram(program_id);
-        position_id = glGetUniformLocation(program_id, "lightPos");
-        color_id = glGetUniformLocation(program_id, "lightColor");
-        step();
-        
-    }
+    Light(GLuint program_id,
+          const char *shadowMapName, const char *depthBiasVPName, const char *lightPosName, const char *lightColorName,
+          GLuint depthProgramID, const char *depthMVPName);
     
-    void step() {
-        angle += 0.01;
-        position.x = static_cast<float>(4 * cos(angle));
-        position.z = static_cast<float>(4 * sin(angle));
-        
-        // Compute the MVP matrix from the light's point of view
-        depthProjectionMatrix = glm::ortho<float>(-10, 10, -10, 10, -10, 20);
-        depthViewMatrix = glm::lookAt(getPosition(), glm::vec3(0,0,0), glm::vec3(0,1,0));
-        
-        // or, for spot light :
-        //glm::vec3 lightPos(5, 20, 20);
-//        depthProjectionMatrix = glm::perspective<float>(45.0f, 1.0f, 2.0f, 50.0f);
-//        depthViewMatrix = glm::lookAt(getPosition(), getPosition() - getInvDir(), glm::vec3(0, 1, 0));
-    }
+    virtual void step();
     
     glm::vec3 getPosition() const {
         return position;
@@ -44,16 +31,46 @@ struct Light {
     glm::vec3 getInvDir() const {
         return getPosition();
     }
+
+    virtual ~Light() {
+        glDeleteFramebuffers(1, &framebuffer);
+        glDeleteTextures(1, &depthTexture);
+    }
     
-    // TODO make static.
-    GLint position_id, color_id;
+    void paint(GLuint vertexbuffer, const std::vector<std::shared_ptr<Model>> &models);
+    
+private:
+    void update_matrices();
+    
+    void initFramebuffer();
+    
+public:
     const GLuint program_id;
+    GLint position_id, color_id;
+    GLint ShadowMapID, DepthBiasID;
     
+    const GLuint depthProgramID;
     glm::mat4 depthProjectionMatrix;
     glm::mat4 depthViewMatrix;
     
+    GLuint depthTexture;
+    GLint depthMatrixID;
+    
+    glm::mat4 getDepthBiasVP() const {
+        glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix;
+        const glm::mat4 biasMatrix(
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+        );
+        return biasMatrix * depthMVP;
+    }
+    
+private:
     glm::vec3 position = glm::vec3(4, 4, 4);
     double angle = 0.0;
+    GLuint framebuffer = 0;
 };
 
 #endif //OBJECT_LIGHT_H

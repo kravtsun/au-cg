@@ -6,22 +6,25 @@ layout(location = 1) in vec3 vertexNormal_modelspace;
 out vec3 Position_worldspace;
 out vec3 Normal_cameraspace;
 out vec3 EyeDirection_cameraspace;
+
+// Light 1. {{{
 out vec3 LightDirection_cameraspace;
 out vec4 ShadowCoord;
+// }}}
 
 uniform mat4 MVP;
 uniform mat4 V;
 uniform mat4 M;
 
+// Light 1. {{{
 uniform vec3 lightPos;
-
-uniform mat4 DepthBiasMVP;
+uniform mat4 DepthBiasVP;
+// }}}
 
 void main(){
-	// Output position of the vertex, in clip space : MVP * position
+	// Output position of the vertex, in clip space.
 	gl_Position =  MVP * vec4(vertexPosition_modelspace, 1);
 
-	// Position of the vertex, in worldspace.
 	vec4 vertPos4 = M * vec4(vertexPosition_modelspace,1);
 	Position_worldspace = vertPos4.xyz / vertPos4.w;
 
@@ -40,6 +43,6 @@ void main(){
 	Normal_cameraspace = ( V * M * vec4(vertexNormal_modelspace, 0)).xyz;
 	// Only correct if ModelMatrix does not scale the model ! Use its inverse transpose if not.
 
-	ShadowCoord = DepthBiasMVP * vec4(vertexPosition_modelspace, 1);
+	ShadowCoord = (DepthBiasVP * M) * vec4(vertexPosition_modelspace, 1);
 }
 

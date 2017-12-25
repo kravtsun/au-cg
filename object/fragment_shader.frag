@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec3 Position_worldspace;
+in vec3 Position_worldspace; // TODO: remove unused.
 in vec3 Normal_cameraspace;
 in vec3 EyeDirection_cameraspace;
 in vec3 LightDirection_cameraspace;
@@ -8,20 +8,30 @@ in vec4 ShadowCoord;
 
 out vec3 color;
 
-uniform mat4 MV;
-uniform vec3 lightPos;
-uniform vec3 lightColor;
-
 uniform vec3 diffuse_color;
 uniform vec3 ambient_color;
 uniform vec3 specular_color;
 
-uniform vec3 cameraPos;
+uniform vec3 cameraPos; // TODO: remove unused.
 
 const float shininess = 16.0;
-const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space
+const float screenGamma = 2.2; // Assume the monitor is calibrated to the sRGB color space?
 
+uniform vec3 lightPos;
+uniform vec3 lightColor;
 uniform sampler2DShadow shadowMap;
+
+float getVisibility(in float lambertian) {
+    float bias = 0.005 * tan(acos(lambertian));
+//    float visibility = 1.0;
+//    if ( texture( shadowMap, ShadowCoord.xy ).z  <  ShadowCoord.z-bias){
+//        visibility = 0.5;
+//    }
+
+    return texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z - bias) / ShadowCoord.w) );
+//    visibility = 1.0;
+//    float visibility = texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z) / ShadowCoord.w) );
+}
 
 void main() {
     vec3 normal = normalize(Normal_cameraspace);
@@ -50,15 +60,7 @@ void main() {
         }
     }
 
-    float bias = 0.005 * tan(acos(lambertian));
-//    float visibility = 1.0;
-//    if ( texture( shadowMap, ShadowCoord.xy ).z  <  ShadowCoord.z-bias){
-//        visibility = 0.5;
-//    }
-
-    float visibility = texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z - bias) / ShadowCoord.w) );
-//    visibility = 1.0;
-//    float visibility = texture( shadowMap, vec3(ShadowCoord.xy, (ShadowCoord.z) / ShadowCoord.w) );
+    float visibility = getVisibility(lambertian);
 
     vec3 linear_color = 0
                 + ambient_color
