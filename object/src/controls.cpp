@@ -1,13 +1,7 @@
 #include "controls.hpp"
-
 #include "glfw_window_manager.h"
-
-// Include GLM
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
-
-#include "controls.hpp"
 
 glm::mat4 ViewMatrix;
 glm::mat4 ProjectionMatrix;
@@ -18,7 +12,6 @@ glm::mat4 getViewMatrix() {
 glm::mat4 getProjectionMatrix() {
 	return ProjectionMatrix;
 }
-
 
 // Initial position : on +Z
 //glm::vec3 position = glm::vec3(0, 0, 5);
