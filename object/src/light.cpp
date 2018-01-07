@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <memory>
+#include <iostream>
 #include "light.h"
 #include "model.h"
 
@@ -28,9 +29,14 @@ Light::Light(GLuint program_id,
 
 
 void Light::step() {
-    angle += 0.01;
+    static bool first = true;
+//    angle += 0.01;
     position.x = static_cast<float>(4 * cos(angle));
     position.z = static_cast<float>(4 * sin(angle));
+    if (first) {
+        first = false;
+        std::cout << "Light: " << "(" << position.x << ", " << position.y << ")" << std::endl;
+    }
     update_matrices();
 }
 
