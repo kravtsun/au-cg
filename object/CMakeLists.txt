@@ -15,8 +15,8 @@ include_directories(src ../common ../3rdparty/glm)
 add_executable(object
             ../3rdparty/glm
             ${SOURCE_FILES}
-            fragment_shader.frag
-            vertex_shader.vert)
+            shader.frag
+            shader.vert)
 
 target_link_libraries(object -lassimp)
 target_link_libraries(object -lGLEW -lGLU -lGL)

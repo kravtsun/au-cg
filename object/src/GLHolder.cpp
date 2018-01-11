@@ -56,9 +56,7 @@ struct Scene {
 
 std::shared_ptr<Scene> scene;
 
-// TODO RotationModel.
-
-std::vector<Light> lights;
+std::vector<std::shared_ptr<Light>> lights;
 GLuint depthProgramID;
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
@@ -74,7 +72,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     glBindVertexArray(vertex_array_id);
     glUseProgram(program_id);
     
-    program_id = load_shaders("vertex_shader.vert", "fragment_shader.frag");
+    program_id = load_shaders("shader.vert", "shader.frag");
     
     matrix_id = glGetUniformLocation(program_id, "MVP");
     view_matrix_id = glGetUniformLocation(program_id, "V");
@@ -89,7 +87,9 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     scene = std::make_shared<Scene>("scene.obj");
 
     depthProgramID = load_shaders("DepthRTT.vert", "DepthRTT.frag");
-    lights.emplace_back(program_id, "shadowMap", "DepthBiasVP", "lightPos", "lightColor", depthProgramID, "depthMVP");
+    auto lightStartPosition = glm::vec3(2.348851, 4.000000, -3.237731);
+    lights.emplace_back(std::make_shared<Light>(depthProgramID, "depthMVP", lightStartPosition));
+    lights.emplace_back(std::make_shared<CircularMovingLight>(depthProgramID, "depthMVP", lightStartPosition));
 }
 
 GLHolder::~GLHolder() {
@@ -99,16 +99,17 @@ GLHolder::~GLHolder() {
     glDeleteVertexArrays(1, &vertex_array_id);
     
     glDeleteProgram(depthProgramID);
-//    glDeleteTextures(1, &Texture);
 }
 
 void GLHolder::paint() {
-    // FIXME.
-    auto &light = lights.front();
-//    for (auto &light : lights) {
-    light.step();
-    light.paint(vertexbuffer, scene->models);
-//    }
+    for (auto &light : lights) {
+        light->preprocess_painting(vertexbuffer, scene->models);
+    }
+    
+    // Render to the screen
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, window_manager->win_width(), window_manager->win_height());
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(program_id);
     
@@ -141,13 +142,28 @@ void GLHolder::paint() {
     const glm::mat4 view_matrix = getViewMatrix();
     PASS_UNIFORM_3F(camera_position_id, getCameraPosition());
     
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, light.depthTexture);
-    glUniform1i(light.ShadowMapID, 0);
-    PASS_UNIFORM_3F(light.position_id, light.getPosition());
-    PASS_UNIFORM_3F(light.color_id, light.getColor());
-    auto depthBiasVP = light.getDepthBiasVP();
-    glUniformMatrix4fv(light.DepthBiasID, 1, GL_FALSE, &depthBiasVP[0][0]);
+    const GLenum textures[] = {GL_TEXTURE0, GL_TEXTURE1};
+    
+    for (size_t i = 0; i < lights.size(); ++i) {
+        glActiveTexture(textures[i]);
+        const auto &light = lights[i];
+        glBindTexture(GL_TEXTURE_2D, light->depthTexture);
+        const auto istr = std::to_string(i);
+        const auto lightsPrefix = "Lights[" + istr + "].";
+        
+        const GLint position_id = glGetUniformLocation(program_id, (lightsPrefix + "position").c_str());
+        const GLint color_id = glGetUniformLocation(program_id, (lightsPrefix + "color").c_str());
+        PASS_UNIFORM_3F(position_id, light->getPosition());
+        PASS_UNIFORM_3F(color_id, light->getColor());
+        
+        const GLint DepthBiasID = glGetUniformLocation(program_id, (lightsPrefix + "DepthBiasVP").c_str());
+        auto depthBiasVP = light->getDepthBiasVP();
+    
+        const auto shadowMaps = "shadowMaps[" + istr + "]";
+        const GLint ShadowMapID = glGetUniformLocation(program_id, shadowMaps.c_str());
+        glUniform1i(ShadowMapID, static_cast<GLint>(i));
+        glUniformMatrix4fv(DepthBiasID, 1, GL_FALSE, &depthBiasVP[0][0]);
+    }
     
     for (auto const &model : scene->models) {
         glm::mat4 model_matrix = model->model_matrix;
@@ -167,4 +183,8 @@ void GLHolder::paint() {
     }
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+    
+    for (auto &light : lights) {
+        light->step();
+    }
 }

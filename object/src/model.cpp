@@ -41,23 +41,23 @@ Model::Model(const aiMesh *mesh, const aiMaterial *material) {
     std::copy(all(vertices), std::back_inserter(all_vertices));
     std::copy(all(normals), std::back_inserter(all_normals));
     
-    aiColor4D color;
-    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &color)) {
-        assert(color.a == 1.0);
-        diffuse_color = glm::vec3(color.r, color.g, color.b);
+    aiColor4D tmp_color;
+    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, &tmp_color)) {
+        assert(tmp_color.a == 1.0);
+        diffuse_color = glm::vec3(tmp_color.r, tmp_color.g, tmp_color.b);
     }
 
     // default ambient color.
     ambient_color = 0.1f * diffuse_color;
     
-    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color)) {
-        assert(color.a == 1.0);
-        ambient_color = glm::vec3(color.r, color.g, color.b);
+    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &tmp_color)) {
+        assert(tmp_color.a == 1.0);
+        ambient_color = glm::vec3(tmp_color.r, tmp_color.g, tmp_color.b);
     }
     
-    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &color)) {
-        assert(color.a == 1.0);
-        specular_color = glm::vec3(color.r, color.g, color.b);
+    if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_SPECULAR, &tmp_color)) {
+        assert(tmp_color.a == 1.0);
+        specular_color = glm::vec3(tmp_color.r, tmp_color.g, tmp_color.b);
     }
 }
 
