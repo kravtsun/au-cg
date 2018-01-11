@@ -46,6 +46,9 @@ Model::Model(const aiMesh *mesh, const aiMaterial *material) {
         assert(color.a == 1.0);
         diffuse_color = glm::vec3(color.r, color.g, color.b);
     }
+
+    // default ambient color.
+    ambient_color = 0.1f * diffuse_color;
     
     if (AI_SUCCESS == aiGetMaterialColor(material, AI_MATKEY_COLOR_AMBIENT, &color)) {
         assert(color.a == 1.0);
@@ -56,8 +59,6 @@ Model::Model(const aiMesh *mesh, const aiMaterial *material) {
         assert(color.a == 1.0);
         specular_color = glm::vec3(color.r, color.g, color.b);
     }
-    
-    ambient_color = 0.1f * diffuse_color;
 }
 
 RotatedModel::RotatedModel(const aiMesh *mesh, const aiMaterial *material) : Model(mesh, material) {}
