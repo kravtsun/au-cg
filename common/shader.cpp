@@ -14,7 +14,7 @@ std::string get_code(const char *path) {
     std::string code;
     std::ifstream stream(path, std::ios::in);
     if(stream.is_open()) {
-        std::string line = "";
+        std::string line;
         while(getline(stream, line)) {
             code += "\n" + line;
         }

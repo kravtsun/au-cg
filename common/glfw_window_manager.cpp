@@ -1,6 +1,14 @@
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "glfw_window_manager.h"
 
-#include <GLFW/glfw3.h>
+static void init_glew()
+{
+    glewExperimental = GL_TRUE; // Needed for core profile
+    if (glewInit() != GLEW_OK) {
+        throw std::logic_error("Failed to initialize GLEW");
+    }
+}
 
 GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_width, const int win_height):
 	win_name_(win_name)
@@ -22,28 +30,31 @@ GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
+	
 	// Open a window and create its OpenGL context
-	window_ = glfwCreateWindow(win_width, win_height, "Fractal", nullptr, nullptr);
+	window_ = glfwCreateWindow(win_width, win_height, win_name.c_str(), nullptr, nullptr);
 
 	if (window_ == nullptr)
 	{
-		throw std::logic_error("Failed to open GLFW window. "
-			"If you have an Intel GPU, "
-			"they are not 3.3 compatible. "
-			"Try the 2.1 version of the tutorials.\n");
+		throw std::logic_error("Failed to open GLFW window. ");
 	}
-	glfwMakeContextCurrent(window_);
+    glfwMakeContextCurrent(window_);
+    glfwSwapInterval(1);
+    init_glew();
+    
+	// Ensure we can capture the escape key being pressed below
 	glfwSetInputMode(window_, GLFW_STICKY_KEYS, GL_TRUE);
+//    glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwPollEvents();
 }
 
 void GLFWWindowManager::main_loop(std::function<void()> inside_action) const
 {
 	// Check if the ESC key was pressed or the window was closed
-	while (!glfwWindowShouldClose(window_))
+	while (glfwGetKey(window_, GLFW_KEY_ESCAPE ) != GLFW_PRESS &&
+            !glfwWindowShouldClose(window_))
 	{
 		inside_action();
-		// Swap buffers
 		glfwSwapBuffers(window_);
 		glfwPollEvents();
 	}

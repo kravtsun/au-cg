@@ -21,7 +21,7 @@ public:
 	void main_loop(std::function<void()> inside_action) const;
 
 	void resize(int new_width, int new_height);
-
+ 
 private:
 	std::string win_name_;
 	int win_width_, win_height_;
