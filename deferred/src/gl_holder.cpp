@@ -1,3 +1,4 @@
+#include <memory>
 #include <cassert>
 #include <glm/glm.hpp>
 #include "gl_holder.h"
@@ -5,29 +6,112 @@
 #include "scene.h"
 #include "controls.h"
 
+#define PASS_UNIFORM_3F(id, value) \
+    glUniform3f(id, (value).x, (value).y, (value).z);
+
+#define PASS_UNIFORM_MAT4(id, value)                                \
+    do {                                                            \
+        const glm::mat4 stable_value = (value);                     \
+        glUniformMatrix4fv(id, 1, GL_FALSE, &(stable_value)[0][0]); \
+    } while (false);
+
+
+struct Light {
+    virtual void step() = 0;
+    
+    glm::vec3 getPosition() const {
+        return position;
+    }
+    
+    glm::vec3 getColor() const {
+        return color;
+    }
+    
+protected:
+    void setPosition(const glm::vec3 &new_position) {
+        position = new_position;
+    }
+    
+    void setColor(const glm::vec3 &new_color) {
+        color = new_color;
+    }
+ 
+    virtual ~Light() = default;
+
+private:
+    glm::vec3 position{0, 0, 0};
+    glm::vec3 color{1.0, 1.0, 1.0};
+};
+
+struct LissajousLight : public Light {
+    static constexpr double delta = M_PI_2;
+    static constexpr double A = 5;
+    static constexpr double B = 5;
+    static constexpr double y = 5;
+    
+    LissajousLight(int a, int b, double t = 0.0, double tstep = 0.01)
+            : a(a), b(b), t(t), tstep(tstep) {
+        assert(std::abs(a - b) == 1);
+    }
+    
+    void step() override {
+        double X, Y;
+        t += tstep;
+        if (t > 2 * M_PI) {
+            t = 0.0;
+        }
+        calculate(a, b, t, X, Y);
+        setPosition(glm::vec3(X, LissajousLight::y, Y));
+    }
+
+private:
+    int a, b;
+    double t, tstep;
+    
+    static void calculate(const double a, const double b, const double t, double &x, double &y) {
+        x = A * sin(a * t + delta);
+        y = B * sin(b * t);
+    }
+};
+
 enum GBUFFER_TEXTURE_TYPE {
     GBUFFER_TEXTURE_TYPE_POSITION,
-//    GBUFFER_TEXTURE_TYPE_DIFFUSE,
     GBUFFER_TEXTURE_TYPE_NORMAL,
+    GBUFFER_TEXTURE_TYPE_DIFFUSE,
+    GBUFFER_TEXTURE_TYPE_AMBIENT,
 //    GBUFFER_TEXTURE_TYPE_TEXCOORD,
-    GBUFFER_NUM_TEXTURES
+            GBUFFER_NUM_TEXTURES
 };
 GLuint textures[GBUFFER_NUM_TEXTURES];
 GLuint depth_texture;
 
 static GLuint fbo;
-//static GLuint program_id;
-static GLuint debug_program_id;
-static GLuint first_program_id, second_program_id;
 
+namespace geom {
+static GLuint program_id;
+static GLuint vertex_array_id, vertexbuffer, normalbuffer;
+// geometry pass variables.
 static GLint mvp_id, m_id, v_id;
 
-static GLuint vertex_array_id, vertexbuffer, normalbuffer;
+static GLint diffuse_color_id, ambient_color_id;
+//static GLint vertex_color_id;
+}
 
+namespace light {
+static GLuint program_id;
+static GLuint quad_vertexbuffer;
+// light pass variables.
+static GLint position_texture_id, normal_texture_id;
+static GLint diffuse_texture_id, ambient_texture_id;
 
-static GLint texID;
+static GLint specular_color_id;
+static GLint v_id;
+static GLint light_position_id, light_color_id;
+}
 
 static std::shared_ptr<Scene> scene;
+
+static std::vector<std::shared_ptr<Light>> lights;
 
 static void init_gbuffer(const int width, const int height) {
     glGenFramebuffers(1, &fbo);
@@ -37,16 +121,16 @@ static void init_gbuffer(const int width, const int height) {
     glGenTextures(GBUFFER_NUM_TEXTURES, textures);
     glGenTextures(1, &depth_texture);
     
-    for (unsigned int i = 0 ; i < GBUFFER_NUM_TEXTURES ; i++) {
+    for (unsigned int i = 0; i < GBUFFER_NUM_TEXTURES; i++) {
         glBindTexture(GL_TEXTURE_2D, textures[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
-    
+        
         // Poor filtering
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    
+        
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, textures[i], 0);
     }
     
@@ -56,10 +140,11 @@ static void init_gbuffer(const int width, const int height) {
     
     const GLenum DrawBuffers[] = {
             GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1
-//            , GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3
+             , GL_COLOR_ATTACHMENT2
+             , GL_COLOR_ATTACHMENT3
     };
     const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
-    static_assert(drawBuffersCount > 1);
+    static_assert(drawBuffersCount == GBUFFER_NUM_TEXTURES);
     glDrawBuffers(drawBuffersCount, DrawBuffers);
     
     const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -67,8 +152,7 @@ static void init_gbuffer(const int width, const int height) {
 }
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
-    : window_manager(window_manager)
-{
+        : window_manager(window_manager) {
     glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
     assert(glGetError() == GL_NO_ERROR);
     
@@ -76,48 +160,70 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     const auto height = window_manager->win_height();
     init_gbuffer(width, height);
     
-//    glEnable(GL_DEPTH_TEST);
-    // Accept fragment if it closer to the camera than the former one
-//    glDepthFunc(GL_LESS);
-//    glEnable(GL_CULL_FACE);
+    glGenVertexArrays(1, &geom::vertex_array_id);
+    glBindVertexArray(geom::vertex_array_id);
     
-    glGenVertexArrays(1, &vertex_array_id);
-    glBindVertexArray(vertex_array_id);
-
-    first_program_id = load_shaders("first.vsh", "first.fsh");
-//    second_program_id = load_shaders("second.vsh", "second.fsh");
-//    program_id = load_shaders("transform.vsh", "texture.fsh");
+    geom::program_id = load_shaders("geom.vsh", "geom.fsh");
     
-    glUseProgram(first_program_id);
-    mvp_id = glGetUniformLocation(first_program_id, "MVP");
-    m_id = glGetUniformLocation(first_program_id, "M");
-    v_id = glGetUniformLocation(first_program_id, "V");
-    
-//    scene = std::make_shared<Scene>("height_map.obj");
-//    scene = std::make_shared<Scene>("../object/scene.obj");
+    glUseProgram(geom::program_id);
+    geom::mvp_id = glGetUniformLocation(geom::program_id, "MVP");
+    geom::m_id = glGetUniformLocation(geom::program_id, "M");
+    geom::v_id = glGetUniformLocation(geom::program_id, "V");
+    geom::diffuse_color_id = glGetUniformLocation(geom::program_id, "diffuse_color");
+    geom::ambient_color_id = glGetUniformLocation(geom::program_id, "ambient_color");
+//    vertex_color_id = glGetUniformLocation(geom::program_id, "vertexColor");
     scene = std::make_shared<Scene>("sagar.obj");
     
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, Model::all_vertices.size() * sizeof(glm::vec3), &Model::all_vertices[0], GL_STATIC_DRAW);
+    glGenBuffers(1, &geom::vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, geom::vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, Model::all_vertices.size() * sizeof(glm::vec3), &Model::all_vertices[0],
+                 GL_STATIC_DRAW);
     
-    glGenBuffers(1, &normalbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-    glBufferData(GL_ARRAY_BUFFER, Model::all_normals.size() * sizeof(glm::vec3), &Model::all_normals[0], GL_STATIC_DRAW);
+    glGenBuffers(1, &geom::normalbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, geom::normalbuffer);
+    glBufferData(GL_ARRAY_BUFFER, Model::all_normals.size() * sizeof(glm::vec3), &Model::all_normals[0],
+                 GL_STATIC_DRAW);
     
-    debug_program_id = load_shaders("Passthrough.vsh", "SimpleTexture.fsh");
-    texID = glGetUniformLocation(debug_program_id, "renderedTexture");
+    light::program_id = load_shaders("light.vsh", "light.fsh");
+    light::position_texture_id = glGetUniformLocation(light::program_id, "positionTexture");
+    light::normal_texture_id = glGetUniformLocation(light::program_id, "normalTexture");
+    light::diffuse_texture_id = glGetUniformLocation(light::program_id, "diffuseTexture");
+    light::ambient_texture_id = glGetUniformLocation(light::program_id, "ambientTexture");
+    
+    light::specular_color_id = glGetUniformLocation(light::program_id, "specular_color");
+    light::v_id = glGetUniformLocation(light::program_id, "V");
+    light::light_position_id = glGetUniformLocation(light::program_id, "lightPos");
+    light::light_color_id = glGetUniformLocation(light::program_id, "lightColor");
+    
+    static const GLfloat quadz = 1.0f;
+    static const GLfloat g_quad_vertex_buffer_data[] = {
+            -1.0f, -1.0f, quadz,
+            1.0f, -1.0f, quadz,
+            -1.0f, 1.0f, quadz,
+            -1.0f, 1.0f, quadz,
+            1.0f, -1.0f, quadz,
+            1.0f, 1.0f, quadz,
+    };
+    
+    glGenBuffers(1, &light::quad_vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, light::quad_vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+    
+    lights.emplace_back(std::make_shared<LissajousLight>(1, 2));
 }
 
-void GLHolder::paint() {
+void GLHolder::geometry_pass() {
+    using namespace geom;
     const int width = window_manager->win_width();
     const int height = window_manager->win_height();
+    
+    // first pass.
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glUseProgram(first_program_id);
-
+    glUseProgram(program_id);
+    
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glVertexAttribPointer(
@@ -128,7 +234,7 @@ void GLHolder::paint() {
             0, // stride
             static_cast<void *>(nullptr) // array buffer offset
     );
-
+    
     glEnableVertexAttribArray(1);
     glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
     glVertexAttribPointer(
@@ -139,7 +245,7 @@ void GLHolder::paint() {
             0,
             static_cast<void *>(nullptr) // array buffer offset
     );
-
+    
     computeMatricesFromInputs(window_manager->window());
     const glm::mat4 projection_matrix = getProjectionMatrix();
     const glm::mat4 view_matrix = getViewMatrix();
@@ -147,46 +253,54 @@ void GLHolder::paint() {
     for (auto const &model : scene->models) {
         const auto &model_matrix = model->model_matrix;
         const glm::mat4 mvp = projection_matrix * view_matrix * model_matrix;
-        glUniformMatrix4fv(mvp_id, 1, GL_FALSE, &mvp[0][0]);
-        glUniformMatrix4fv(m_id, 1, GL_FALSE, &model_matrix[0][0]);
-        glUniformMatrix4fv(v_id, 1, GL_FALSE, &view_matrix[0][0]);
-
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        PASS_UNIFORM_MAT4(mvp_id, mvp);
+        PASS_UNIFORM_MAT4(m_id, model_matrix);
+        PASS_UNIFORM_MAT4(v_id, view_matrix);
+    
+        glUniform3f(diffuse_color_id, 1.0, 0.0f, 0.0f);
+        glUniform3f(ambient_color_id, 0.0, 0.0f, 0.0f);
+        
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         glDrawArrays(GL_TRIANGLES, static_cast<GLint>(model->all_vertices_offset), static_cast<GLsizei>(model->size()));
         model->step();
     }
-    assert(glGetError() == GL_NO_ERROR);
-    
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-    
+}
+
+void GLHolder::light_pass() {
+    using namespace light;
+    const int width = window_manager->win_width();
+    const int height = window_manager->win_height();
+    // second pass.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glUseProgram(debug_program_id);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textures[1]);
-    glUniform1i(texID, 0);
+    glUseProgram(program_id);
+    
+    const GLint texture_ids[] = {
+            position_texture_id
+            , normal_texture_id
+            , diffuse_texture_id
+            , ambient_texture_id
+    };
+    const int texture_ids_count = sizeof(texture_ids) / sizeof(texture_ids[0]);
+    static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES);
+    for (int itex = 0; itex < texture_ids_count; ++itex) {
+        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + itex));
+        glBindTexture(GL_TEXTURE_2D, textures[itex]);
+        glUniform1i(texture_ids[itex], itex);
+    }
+    
+    glUniform3f(specular_color_id, 1.0, 1.0f, 1.0f);
+    
+    auto v = getViewMatrix();
+    PASS_UNIFORM_MAT4(v_id, v);
     
     GLuint quad_VertexArrayID;
     glGenVertexArrays(1, &quad_VertexArrayID);
     glBindVertexArray(quad_VertexArrayID);
-
-    const GLfloat quadz = 1.0f;
-    static const GLfloat g_quad_vertex_buffer_data[] = {
-            -1.0f, -1.0f, quadz,
-            1.0f, -1.0f, quadz,
-            -1.0f,  1.0f, quadz,
-            -1.0f,  1.0f, quadz,
-            1.0f, -1.0f, quadz,
-            1.0f,  1.0f, quadz,
-    };
-
-    GLuint quad_vertexbuffer;
-    glGenBuffers(1, &quad_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
     
     // 1rst attribute buffer : vertices
     glEnableVertexAttribArray(0);
@@ -199,23 +313,39 @@ void GLHolder::paint() {
             0,
             nullptr
     );
-
-    // Draw the triangles !
-    glDrawArrays(GL_TRIANGLES, 0, 6); // 2*3 indices starting at 0 -> 2 triangles
-
+    
+    for (auto const &light : lights) {
+        PASS_UNIFORM_3F(light_position_id, light->getPosition());
+        PASS_UNIFORM_3F(light_color_id, light->getColor());
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        light->step();
+    }
+    
     glDisableVertexAttribArray(0);
+}
 
+void GLHolder::paint() {
+    geometry_pass();
+    assert(glGetError() == GL_NO_ERROR);
+    light_pass();
     assert(glGetError() == GL_NO_ERROR);
 }
 
 GLHolder::~GLHolder() {
-    glDeleteBuffers(1, &vertexbuffer);
-    glDeleteBuffers(1, &normalbuffer);
-//    glDeleteProgram(program_id);
-    glDeleteProgram(first_program_id);
-//    glDeleteProgram(second_program_id);
-    glDeleteVertexArrays(1, &vertex_array_id);
+    // TODO create singletons from geom and light namespaces and move this deletions to destructors
+    // (GLHolder should own those singletons)
+    glDeleteBuffers(1, &geom::vertexbuffer);
+    glDeleteBuffers(1, &geom::normalbuffer);
+    glDeleteProgram(geom::program_id);
+    glDeleteVertexArrays(1, &geom::vertex_array_id);
     
+    glDeleteBuffers(1, &geom::vertexbuffer);
+    glDeleteBuffers(1, &geom::normalbuffer);
+    
+    glDeleteProgram(light::program_id);
+//    glDeleteProgram(second_program_id);
+    glDeleteTextures(GBUFFER_NUM_TEXTURES, textures);
+
 //    glDeleteProgram(depthProgramID);
 }
 

@@ -15,6 +15,10 @@ public:
 
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
+    
+    void geometry_pass();
+    
+    void light_pass();
 };
 
 

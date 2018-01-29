@@ -26,10 +26,8 @@ set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES})
 add_executable(deferred
     ../3rdparty/glm
     ${SOURCE_FILES}
-    first.vsh first.fsh
-    second.vsh second.fsh
-    texture.fsh transform.vsh
-    debug.fsh debug.vsh
+    geom.vsh geom.fsh
+    light.fsh light.vsh
 )
 
 include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
