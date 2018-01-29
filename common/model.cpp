@@ -9,7 +9,7 @@ std::vector<glm::vec3> Model::all_normals;
 
 Model::Model(const aiMesh *mesh, const aiMaterial *material) {
     vertices.reserve(mesh->mNumVertices);
-    for(auto i = 0; i < mesh->mNumVertices; i++){
+    for (auto i = 0; i < mesh->mNumVertices; i++) {
         aiVector3D pos = mesh->mVertices[i];
         vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
     }
@@ -22,14 +22,14 @@ Model::Model(const aiMesh *mesh, const aiMaterial *material) {
     
     // Fill vertices normals
     normals.reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         aiVector3D n = mesh->mNormals[i];
         normals.push_back(glm::vec3(n.x, n.y, n.z));
     }
     
     // Fill face indices
-    indices.reserve(3*mesh->mNumFaces);
-    for (unsigned int i=0; i<mesh->mNumFaces; i++){
+    indices.reserve(3 * mesh->mNumFaces);
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         // Assume the model has only triangles.
         indices.push_back(mesh->mFaces[i].mIndices[0]);
         indices.push_back(mesh->mFaces[i].mIndices[1]);
@@ -46,7 +46,7 @@ Model::Model(const aiMesh *mesh, const aiMaterial *material) {
         assert(tmp_color.a == 1.0);
         diffuse_color = glm::vec3(tmp_color.r, tmp_color.g, tmp_color.b);
     }
-
+    
     // default ambient color.
     ambient_color = 0.1f * diffuse_color;
     

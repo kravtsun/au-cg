@@ -1,58 +1,19 @@
 #include <memory>
 
 #include "GLHolder.h"
-#include "shader.hpp"
+#include "shader.h"
 #include "model.h"
 #include "light.h"
-#include "controls.hpp"
+#include "controls.h"
+#include "scene.h"
 
-GLuint program_id;
-GLint matrix_id, view_matrix_id, model_matrix_id;
-GLint diffuse_color_id, ambient_color_id, specular_color_id;
-GLint camera_position_id;
+static GLuint program_id;
+static GLint matrix_id, view_matrix_id, model_matrix_id;
+static GLint diffuse_color_id, ambient_color_id, specular_color_id;
+static GLint camera_position_id;
 
-GLuint vertex_array_id;
-GLuint vertexbuffer;
-GLuint normalbuffer;
-
-struct Scene {
-    std::vector<std::shared_ptr<Model>> models;
-    
-    explicit Scene() = default;
-    
-    explicit Scene(const std::string &path) {
-        Assimp::Importer importer;
-        
-        const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-        if( !scene) {
-            throw std::logic_error(importer.GetErrorString());
-        }
-        
-        for (int imesh = 0; imesh < scene->mNumMeshes; ++imesh) {
-            const aiMesh* mesh = scene->mMeshes[imesh];
-            const aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-            std::shared_ptr<Model> model_ptr;
-//            if (mesh->mName == aiString("suzanne")) {
-//            if (strstr("bunny", mesh->mName.C_Str()) != NULL) {
-            if (mesh->mNumVertices > 30000) {
-                model_ptr = std::make_shared<RotatedModel>(mesh, material);
-            } else {
-                model_ptr = std::make_shared<Model>(mesh, material);
-            }
-            if (model_ptr)
-                models.emplace_back(model_ptr);
-        }
-        
-        glGenBuffers(1, &vertexbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glBufferData(GL_ARRAY_BUFFER, Model::all_vertices.size() * sizeof(glm::vec3), &Model::all_vertices[0], GL_STATIC_DRAW);
-        
-        glGenBuffers(1, &normalbuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
-        glBufferData(GL_ARRAY_BUFFER, Model::all_normals.size() * sizeof(glm::vec3), &Model::all_normals[0], GL_STATIC_DRAW);
-    }
-    
-};
+static GLuint vertex_array_id;
+static GLuint vertexbuffer, normalbuffer;
 
 std::shared_ptr<Scene> scene;
 
@@ -84,7 +45,15 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     
     camera_position_id = glGetUniformLocation(program_id, "cameraPos");
     
-    scene = std::make_shared<Scene>("scene.obj");
+    scene = std::make_shared<Scene>("scene.obj", 30000);
+    
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, Model::all_vertices.size() * sizeof(glm::vec3), &Model::all_vertices[0], GL_STATIC_DRAW);
+    
+    glGenBuffers(1, &normalbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+    glBufferData(GL_ARRAY_BUFFER, Model::all_normals.size() * sizeof(glm::vec3), &Model::all_normals[0], GL_STATIC_DRAW);
 
     depthProgramID = load_shaders("DepthRTT.vert", "DepthRTT.frag");
     auto lightStartPosition = glm::vec3(2.348851, 4.000000, -3.237731);
@@ -135,9 +104,7 @@ void GLHolder::paint() {
             static_cast<void *>(nullptr)      // array buffer offset
     );
     
-    if (window_manager) {
-        computeMatricesFromInputs(window_manager->window());
-    }
+    computeMatricesFromInputs(window_manager->window());
     const glm::mat4 projection_matrix = getProjectionMatrix();
     const glm::mat4 view_matrix = getViewMatrix();
     PASS_UNIFORM_3F(camera_position_id, getCameraPosition());

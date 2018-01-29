@@ -6,17 +6,22 @@ find_package(GLEW REQUIRED)
 find_package(glfw3 3.1.2 REQUIRED)
 find_package(assimp 3.2 REQUIRED)
 
-AUX_SOURCE_DIRECTORY(../common/ COMMON_FILES)
-AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} )
+file(GLOB COMMON_FILES
+    ../common/*.cpp
+    ../common/*.h
+)
 
-include_directories(src ../common ../3rdparty/glm)
+AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES})
 
 add_executable(object
-            ../3rdparty/glm
-            ${SOURCE_FILES}
-            shader.frag
-            shader.vert)
+    ../3rdparty/glm
+    ${SOURCE_FILES}
+    shader.frag
+    shader.vert
+)
+
+include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 
 target_link_libraries(object -lassimp)
 target_link_libraries(object -lGLEW -lGLU -lGL)
