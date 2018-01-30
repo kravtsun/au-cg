@@ -71,7 +71,8 @@ void main() {
 //    reflectedLight += specular * lightColor;
     vec3 scatteredLight = lambertian * lightColor;
     vec3 reflectedLight = specular * lightColor;
-    vec3 linear_color = min(ambient_color +
+    vec3 linear_color = min(
+//                            ambient_color +
                             light_cone_coefficient(vertexPosition_worldspace) *
                                 (scatteredLight * diffuse_color +
                                 reflectedLight * specular_color)

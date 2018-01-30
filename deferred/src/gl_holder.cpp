@@ -97,7 +97,7 @@ struct StationaryLight : public Light {
 };
 
 enum GBUFFER_TEXTURE_TYPE {
-    GBUFFER_TEXTURE_TYPE_POSITION,
+    GBUFFER_TEXTURE_TYPE_POSITION = 0,
     GBUFFER_TEXTURE_TYPE_NORMAL,
     GBUFFER_TEXTURE_TYPE_DIFFUSE,
     GBUFFER_TEXTURE_TYPE_AMBIENT,
@@ -130,6 +130,13 @@ static GLint specular_color_id;
 static GLint v_id;
 static GLint light_position_id, light_color_id, light_angle_id;
 }
+
+namespace ambient_render {
+static GLuint program_id;
+static GLint texture_id;
+}
+
+GLuint quad_VertexArrayID;
 
 static std::shared_ptr<Scene> scene;
 
@@ -232,8 +239,19 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     glBindBuffer(GL_ARRAY_BUFFER, light::quad_vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
     
+    glGenVertexArrays(1, &quad_VertexArrayID);
+    glBindVertexArray(quad_VertexArrayID);
+    
+    ambient_render::program_id = load_shaders("light.vsh", "debug.fsh");
+    ambient_render::texture_id = glGetUniformLocation(ambient_render::program_id, "renderedTexture");
+    
     lights.push_back(std::make_shared<StationaryLight>());
     lights.push_back(std::make_shared<LissajousLight>(1, 2));
+    lights.push_back(std::make_shared<LissajousLight>(2, 1));
+    lights.push_back(std::make_shared<LissajousLight>(3, 2));
+    lights.push_back(std::make_shared<LissajousLight>(5, 4));
+    lights.push_back(std::make_shared<LissajousLight>(5, 6));
+    lights.push_back(std::make_shared<LissajousLight>(9, 8));
 }
 
 void GLHolder::geometry_pass() {
@@ -292,6 +310,30 @@ void GLHolder::geometry_pass() {
     glDisableVertexAttribArray(1);
 }
 
+static void ambient_render_pass() {
+    glUseProgram(ambient_render::program_id);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, textures[GBUFFER_TEXTURE_TYPE_AMBIENT]);
+    glUniform1i(ambient_render::texture_id, 0);
+    
+    {
+        // 1rst attribute buffer : vertices
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, light::quad_vertexbuffer);
+        glVertexAttribPointer(
+                0,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                nullptr
+        );
+        
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDisableVertexAttribArray(0);
+    }
+}
+
 void GLHolder::light_pass() {
     using namespace light;
     const int width = window_manager->win_width();
@@ -301,13 +343,11 @@ void GLHolder::light_pass() {
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    glUseProgram(program_id);
+    ambient_render_pass();
     
+    glUseProgram(program_id);
     const GLint texture_ids[] = {
-            position_texture_id
-            , normal_texture_id
-            , diffuse_texture_id
-            , ambient_texture_id
+            position_texture_id, normal_texture_id, diffuse_texture_id, ambient_texture_id
     };
     const int texture_ids_count = sizeof(texture_ids) / sizeof(texture_ids[0]);
     static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES);
@@ -321,10 +361,10 @@ void GLHolder::light_pass() {
     
     auto v = getViewMatrix();
     PASS_UNIFORM_MAT4(v_id, v);
-    
-    GLuint quad_VertexArrayID;
-    glGenVertexArrays(1, &quad_VertexArrayID);
-    glBindVertexArray(quad_VertexArrayID);
+
+//    GLuint quad_VertexArrayID;
+//    glGenVertexArrays(1, &quad_VertexArrayID);
+//    glBindVertexArray(quad_VertexArrayID);
     
     // 1rst attribute buffer : vertices
     glEnableVertexAttribArray(0);
@@ -338,6 +378,10 @@ void GLHolder::light_pass() {
             nullptr
     );
     
+    bool blendEnabledBefore = glIsEnabled(GL_BLEND);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    
     for (auto const &light : lights) {
         PASS_UNIFORM_3F(light_position_id, light->getPosition());
         PASS_UNIFORM_3F(light_color_id, light->getColor());
@@ -346,6 +390,10 @@ void GLHolder::light_pass() {
         light->step();
     }
     
+    if (!blendEnabledBefore) {
+        glDisable(GL_BLEND);
+    }
+
     glDisableVertexAttribArray(0);
 }
 
@@ -360,6 +408,8 @@ GLHolder::~GLHolder() {
     // TODO create singletons from geom and light namespaces and move this deletions to destructors
     // (GLHolder should own those singletons)
     glDeleteTextures(GBUFFER_NUM_TEXTURES, textures);
+    
+    glDeleteVertexArrays(1, &quad_VertexArrayID);
     
     glDeleteBuffers(1, &geom::vertexbuffer);
     glDeleteBuffers(1, &geom::normalbuffer);

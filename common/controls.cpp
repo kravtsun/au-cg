@@ -17,7 +17,7 @@ glm::mat4 getProjectionMatrix() {
 
 // Initial position : on +Z
 //glm::vec3 position = glm::vec3(0, 0, 5);
-static glm::vec3 position = glm::vec3(-4.362360, 1.444663, 5);
+static glm::vec3 position = glm::vec3(-6.222297, 7.269458, 8.685856);
 
 glm::vec3 getCameraPosition() {
     return position;
@@ -25,10 +25,10 @@ glm::vec3 getCameraPosition() {
 
 // Initial horizontal angle : toward -Z
 //float horizontalAngle = static_cast<float>(M_PI);
-float horizontalAngle = 2.412064;
+float horizontalAngle = 2.342062;
 // Initial vertical angle : none
 //float verticalAngle = 0;
-float verticalAngle = 0.040510;
+float verticalAngle = -0.554490;
 
 // Initial Field of View
 static float FoV = 45.0f;
@@ -41,6 +41,7 @@ void changeFov(float FoVdelta) {
 }
 
 void computeMatricesFromInputs(GLFWwindow *window) {
+//    static int cnt = 0;
     // glfwGetTime is called only once, the first time this function is called
     static double lastTime = glfwGetTime();
     
@@ -97,11 +98,12 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
         position -= right * deltaTime * move_speed;
     }
-
-//    printf("position = (%lf, %lf, %lf)\n", position.x, position.y, position.z);
-//    printf("horizontalAngle = %lf\n", horizontalAngle);
-//    printf("verticalAngle = %lf\n", verticalAngle);
-
+    
+//    cnt++;
+//    if (cnt % 10 == 0) {printf("position = (%lf, %lf, %lf)\n", position.x, position.y, position.z);
+//        printf("horizontalAngle = %lf\n", horizontalAngle);
+//        printf("verticalAngle = %lf\n", verticalAngle);
+//    }
 
 //	float FoV = FoV;// - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting up a callback for this. It's a bit too complicated for this beginner's tutorial, so it's disabled instead.
     
