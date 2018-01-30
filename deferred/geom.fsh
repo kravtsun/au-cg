@@ -3,7 +3,7 @@
 //layout(location = 0) in vec3 pos;
 //layout(location = 1) in vec3 n;
 
-in vec3 vertexPosition_cameraspace; // position.
+in vec3 vertexPosition_worldspace; // position.
 in vec3 Normal_cameraspace; // normal.
 //in vec3 vertexColor;
 //varying vec3 n;
@@ -18,7 +18,7 @@ layout(location = 3) out vec3 ambient;
 
 void main (void)
 {
-    position = vertexPosition_cameraspace;
+    position = vertexPosition_worldspace;
     normal = Normal_cameraspace;
     diffuse = diffuse_color;
     ambient = ambient_color;

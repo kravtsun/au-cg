@@ -7,12 +7,13 @@ uniform mat4 MVP;
 uniform mat4 M;
 uniform mat4 V;
 
-out vec3 vertexPosition_cameraspace; // position.
+out vec3 vertexPosition_worldspace; // position.
 out vec3 Normal_cameraspace; // normal.
 //out vec3 vertexColor; // unused?
 
 void main() {
-    vertexPosition_cameraspace = (V * M * vec4(vertexPosition_modelspace, 1)).xyz;
+    vec4 vertexPos = M * vec4(vertexPosition_modelspace, 1);
+    vertexPosition_worldspace = vertexPos.xyz / vertexPos.w;
     Normal_cameraspace = (V * M * vec4(vertexNormal_modelspace, 0)).xyz;
 //    vertexColor = vec3(1.0, 0.0, 0.0);
 
