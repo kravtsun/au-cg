@@ -173,7 +173,7 @@ static void init_gbuffer(const int width, const int height) {
              , GL_COLOR_ATTACHMENT3
     };
     const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
-    static_assert(drawBuffersCount == GBUFFER_NUM_TEXTURES);
+    static_assert(drawBuffersCount == GBUFFER_NUM_TEXTURES, "");
     glDrawBuffers(drawBuffersCount, DrawBuffers);
     
     const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -361,7 +361,7 @@ void GLHolder::light_pass() {
                 position_texture_id, normal_texture_id, diffuse_texture_id, ambient_texture_id
         };
         const int texture_ids_count = sizeof(texture_ids) / sizeof(texture_ids[0]);
-        static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES);
+        static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES, "");
         for (int itex = 0; itex < texture_ids_count; ++itex) {
             glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + itex));
             glBindTexture(GL_TEXTURE_2D, textures[itex]);
