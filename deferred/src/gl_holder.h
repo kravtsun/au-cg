@@ -12,7 +12,18 @@ public:
     virtual void paint();
     
     virtual ~GLHolder();
-
+    
+    static constexpr int maxLightsCount = 10;
+    int lightsCount = maxLightsCount;
+    
+    enum Mode {
+        POSITION,
+        NORMAL,
+        DIFFUSE,
+        AMBIENT,
+        DEFERRED
+    };
+    Mode mode = DEFERRED;
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
     

@@ -66,7 +66,6 @@ GLHolder::~GLHolder() {
     glDeleteBuffers(1, &normalbuffer);
     glDeleteProgram(program_id);
     glDeleteVertexArrays(1, &vertex_array_id);
-    
     glDeleteProgram(depthProgramID);
 }
 

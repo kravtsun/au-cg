@@ -36,15 +36,10 @@ static glm::dvec2 mouse_pos;
 static void glfw_mouse_pos_callback(GLFWwindow *_window, double xpos, double ypos) {
     if (!TwEventMousePosGLFW(static_cast<int>(xpos), static_cast<int>(ypos))) {
         const glm::dvec2 cur_pos{xpos, ypos};
-//				if (glfwGetMouseButton(_window, GLFW_MOUSE_BUTTON_1) == GLFW_PRESS)
-//				{
-//					point_transfomer->change_center_with_mouse_move(cur_pos - mouse_pos);
-//				}
     }
     mouse_pos = glm::vec2(xpos, ypos);
 }
 
-//		static GLfloat scale_delta_multiplier = 1.1f;
 //*  @param[in] window The window that received the event.
 //*  @param[in] xoffset The scroll offset along the x - axis.
 //*  @param[in] yoffset The scroll offset along the y - axis.
@@ -52,10 +47,6 @@ static void glfw_mouse_wheel_callback(GLFWwindow *, double xoffset, double yoffs
     if (!TwEventMouseWheelGLFW(static_cast<int>(yoffset))) {
         assert(xoffset == 0.0);
         changeFov(static_cast<float>(yoffset * 2));
-//				assert(scale_delta_multiplier > 1);
-//
-//				const double multiplier = yoffset < 0 ? scale_delta_multiplier : 1 / scale_delta_multiplier;
-//				point_transfomer->multiply_scale(multiplier, mouse_pos);
     }
 }
 
@@ -102,8 +93,21 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
     tw_error = TwWindowSize(window_manager->win_width(), window_manager->win_height());
     throw_on_atb_error("TwWindowSize");
 
-//		tw_error = TwAddVarRW(impl::myBar, "iterations", TW_TYPE_UINT32, &gl_holder->iterations, "");
-//		throw_on_atb_error("TwAddVarRw(iterations)");
+    auto lightsCount = "label='lightsCount' min=0 max=" + std::to_string(GLHolder::maxLightsCount);
+    tw_error = TwAddVarRW(impl::myBar, "lightsCount", TW_TYPE_UINT32, &gl_holder->lightsCount, lightsCount.c_str());
+    throw_on_atb_error("TwAddVarRw(iterations)");
+    
+    TwEnumVal modes[] = {
+            {GLHolder::Mode::POSITION, "Position"},
+            {GLHolder::Mode::NORMAL, "Normal"},
+            {GLHolder::Mode::DIFFUSE, "Diffuse"},
+            {GLHolder::Mode::AMBIENT, "Ambient"},
+            {GLHolder::Mode::DEFERRED, "Deferred"},
+    };
+    TwType modeType;
+
+    modeType = TwDefineEnum("ModeType", modes, 5);
+    TwAddVarRW(impl::myBar, "Season", modeType, &gl_holder->mode, NULL);
 
 //		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, " step=0.02 ");
 //		throw_on_atb_error("TwAddVarRw(scale)");

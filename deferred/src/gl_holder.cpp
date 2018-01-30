@@ -249,9 +249,13 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     lights.push_back(std::make_shared<LissajousLight>(1, 2));
     lights.push_back(std::make_shared<LissajousLight>(2, 1));
     lights.push_back(std::make_shared<LissajousLight>(3, 2));
+    lights.push_back(std::make_shared<LissajousLight>(2, 3));
     lights.push_back(std::make_shared<LissajousLight>(5, 4));
+    lights.push_back(std::make_shared<LissajousLight>(4, 5));
     lights.push_back(std::make_shared<LissajousLight>(5, 6));
+    lights.push_back(std::make_shared<LissajousLight>(6, 5));
     lights.push_back(std::make_shared<LissajousLight>(9, 8));
+    lights.push_back(std::make_shared<LissajousLight>(8, 9));
 }
 
 void GLHolder::geometry_pass() {
@@ -310,10 +314,10 @@ void GLHolder::geometry_pass() {
     glDisableVertexAttribArray(1);
 }
 
-static void ambient_render_pass() {
+static void ambient_render_pass(int texId) {
     glUseProgram(ambient_render::program_id);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textures[GBUFFER_TEXTURE_TYPE_AMBIENT]);
+    glBindTexture(GL_TEXTURE_2D, textures[texId]);
     glUniform1i(ambient_render::texture_id, 0);
     
     {
@@ -338,63 +342,62 @@ void GLHolder::light_pass() {
     using namespace light;
     const int width = window_manager->win_width();
     const int height = window_manager->win_height();
-    // second pass.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    ambient_render_pass();
+    int texId = mode == DEFERRED ? GBUFFER_TEXTURE_TYPE_AMBIENT : static_cast<int>(mode);
+    ambient_render_pass(texId);
     
-    glUseProgram(program_id);
-    const GLint texture_ids[] = {
-            position_texture_id, normal_texture_id, diffuse_texture_id, ambient_texture_id
-    };
-    const int texture_ids_count = sizeof(texture_ids) / sizeof(texture_ids[0]);
-    static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES);
-    for (int itex = 0; itex < texture_ids_count; ++itex) {
-        glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + itex));
-        glBindTexture(GL_TEXTURE_2D, textures[itex]);
-        glUniform1i(texture_ids[itex], itex);
+    if (mode == DEFERRED) {
+        glUseProgram(program_id);
+        const GLint texture_ids[] = {
+                position_texture_id, normal_texture_id, diffuse_texture_id, ambient_texture_id
+        };
+        const int texture_ids_count = sizeof(texture_ids) / sizeof(texture_ids[0]);
+        static_assert(texture_ids_count == GBUFFER_NUM_TEXTURES);
+        for (int itex = 0; itex < texture_ids_count; ++itex) {
+            glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + itex));
+            glBindTexture(GL_TEXTURE_2D, textures[itex]);
+            glUniform1i(texture_ids[itex], itex);
+        }
+    
+        glUniform3f(specular_color_id, 1.0, 1.0f, 1.0f);
+    
+        auto v = getViewMatrix();
+        PASS_UNIFORM_MAT4(v_id, v);
+    
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+        glVertexAttribPointer(
+                0,
+                3,
+                GL_FLOAT,
+                GL_FALSE,
+                0,
+                nullptr
+        );
+    
+        bool blendEnabledBefore = glIsEnabled(GL_BLEND);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+    
+        for (int i = 0; i < lightsCount && i < static_cast<int>(lights.size()); ++i) {
+            auto const &light = lights[i];
+            PASS_UNIFORM_3F(light_position_id, light->getPosition());
+            PASS_UNIFORM_3F(light_color_id, light->getColor());
+            glUniform1f(light_angle_id, light->getAngle());
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            light->step();
+        }
+    
+        if (!blendEnabledBefore) {
+            glBlendFunc(GL_ONE, GL_ZERO);
+            glDisable(GL_BLEND);
+        }
+    
+        glDisableVertexAttribArray(0);
     }
-    
-    glUniform3f(specular_color_id, 1.0, 1.0f, 1.0f);
-    
-    auto v = getViewMatrix();
-    PASS_UNIFORM_MAT4(v_id, v);
-
-//    GLuint quad_VertexArrayID;
-//    glGenVertexArrays(1, &quad_VertexArrayID);
-//    glBindVertexArray(quad_VertexArrayID);
-    
-    // 1rst attribute buffer : vertices
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            nullptr
-    );
-    
-    bool blendEnabledBefore = glIsEnabled(GL_BLEND);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    
-    for (auto const &light : lights) {
-        PASS_UNIFORM_3F(light_position_id, light->getPosition());
-        PASS_UNIFORM_3F(light_color_id, light->getColor());
-        glUniform1f(light_angle_id, light->getAngle());
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        light->step();
-    }
-    
-    if (!blendEnabledBefore) {
-        glDisable(GL_BLEND);
-    }
-
-    glDisableVertexAttribArray(0);
 }
 
 void GLHolder::paint() {
