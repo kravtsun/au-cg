@@ -29,6 +29,10 @@ struct Light {
         return color;
     }
     
+    void setColor(const glm::vec3 &new_color) {
+        color = new_color;
+    }
+    
     float getAngle() const {
         return angle;
     }
@@ -42,10 +46,6 @@ protected:
         position = new_position;
     }
     
-    void setColor(const glm::vec3 &new_color) {
-        color = new_color;
-    }
- 
     virtual ~Light() = default;
 
 private:
@@ -247,11 +247,17 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     
     lights.push_back(std::make_shared<StationaryLight>());
     lights.push_back(std::make_shared<LissajousLight>(1, 2));
+    lights.back()->setColor(glm::vec3(0.0, 1.0, 0.0));
     lights.push_back(std::make_shared<LissajousLight>(2, 1));
+    lights.back()->setColor(glm::vec3(0.0, 0.0, 1.0));
     lights.push_back(std::make_shared<LissajousLight>(3, 2));
+    lights.back()->setColor(glm::vec3(0.0, 1.0, 1.0));
     lights.push_back(std::make_shared<LissajousLight>(2, 3));
+    lights.back()->setColor(glm::vec3(1.0, 1.0, 0.0));
     lights.push_back(std::make_shared<LissajousLight>(5, 4));
+    lights.back()->setColor(glm::vec3(1.0, 0.0, 1.0));
     lights.push_back(std::make_shared<LissajousLight>(4, 5));
+    lights.back()->setColor(glm::vec3(1.0, 0.0, 0.0));
     lights.push_back(std::make_shared<LissajousLight>(5, 6));
     lights.push_back(std::make_shared<LissajousLight>(6, 5));
     lights.push_back(std::make_shared<LissajousLight>(9, 8));
