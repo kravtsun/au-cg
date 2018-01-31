@@ -41,8 +41,6 @@ LightPass::LightPass(int width, int height)
     light_position_id = glGetUniformLocation(program_id, "lightPos");
     light_color_id = glGetUniformLocation(program_id, "lightColor");
     light_angle_id = glGetUniformLocation(program_id, "lightAngle");
-    
-    
 }
 
 // TODO migrate to unified LightPass::pass() and make it virtual with Pass::pass() = 0.
@@ -75,17 +73,6 @@ void LightPass::pass(const GeometryPass &geometryPass,
         auto v = getViewMatrix();
         PASS_UNIFORM_MAT4(v_id, v);
         
-//        glEnableVertexAttribArray(0);
-//        glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-//        glVertexAttribPointer(
-//                0,
-//                3,
-//                GL_FLOAT,
-//                GL_FALSE,
-//                0,
-//                nullptr
-//        );
-        
         const bool blendEnabledBefore = glIsEnabled(GL_BLEND);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
@@ -94,7 +81,6 @@ void LightPass::pass(const GeometryPass &geometryPass,
             PASS_UNIFORM_3F(light_position_id, light->getPosition());
             PASS_UNIFORM_3F(light_color_id, light->getColor());
             glUniform1f(light_angle_id, light->getAngle());
-//            glDrawArrays(GL_TRIANGLES, 0, 6);
             drawTexture();
             light->step();
         }
@@ -103,8 +89,6 @@ void LightPass::pass(const GeometryPass &geometryPass,
             glBlendFunc(GL_ONE, GL_ZERO);
             glDisable(GL_BLEND);
         }
-        
-//        glDisableVertexAttribArray(0);
     }
 }
 

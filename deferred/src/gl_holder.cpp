@@ -34,6 +34,8 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         , geometryPass(window_manager->win_width(), window_manager->win_height())
         , lightPass(window_manager->win_width(), window_manager->win_height())
         , texturePass(window_manager->win_width(), window_manager->win_height())
+        , thresholdPass(window_manager->win_width(), window_manager->win_height())
+        , blurPass(window_manager->win_width(), window_manager->win_height())
 {
     assert(glGetError() == GL_NO_ERROR);
     glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
@@ -64,17 +66,20 @@ void GLHolder::paint() {
     assert(glGetError() == GL_NO_ERROR);
     
     // TODO geometryPass's depthTexture not rendered with texturePass.
-    
     auto currentLights = lights;
     currentLights.resize(lightsCount);
     // TODO use a separate texturePass for lightPass's pass.
     lightPass.pass(geometryPass, texturePass, currentLights);
     assert(glGetError() == GL_NO_ERROR);
     
-    // move framebuffer binding to texturePass.
+    thresholdPass.pass(lightPass.color_texture, 0.7);
+    blurPass.pass(thresholdPass.mask_texture);
+    
+    // TODO move framebuffer binding to texturePass.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, window_manager->win_width(), window_manager->win_height());
-    texturePass.pass(lightPass.color_texture);
+//    texturePass.pass(thresholdPass.mask_texture);
+    texturePass.pass(blurPass.outputTexture());
 }
 
 GLHolder::~GLHolder() = default;

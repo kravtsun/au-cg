@@ -8,6 +8,8 @@
 #include "TexturePass.h"
 #include "GeometryPass.h"
 #include "LightPass.h"
+#include "ThresholdPass.h"
+#include "BlurPass.h"
 
 struct Light;
 
@@ -28,6 +30,8 @@ public:
     TexturePass texturePass;
     GeometryPass geometryPass;
     LightPass lightPass;
+    ThresholdPass thresholdPass;
+    BlurPass blurPass;
 };
 
 

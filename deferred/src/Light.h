@@ -1,7 +1,7 @@
 #ifndef DEFERRED_LIGHT_H
 #define DEFERRED_LIGHT_H
 
-#include<cmath>
+#include <cmath>
 #include <glm/glm.hpp>
 
 struct Light {
@@ -72,7 +72,6 @@ private:
         y = B * sin(b * t);
     }
 };
-
 
 struct StationaryLight : public Light {
     StationaryLight() = default;

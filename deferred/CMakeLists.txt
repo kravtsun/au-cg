@@ -29,14 +29,20 @@ AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
 set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES}
     src/GeometryPass.cpp src/GeometryPass.h
     src/PassCommon.h src/PassCommon.cpp
-        src/LightPass.cpp src/LightPass.h src/TexturePass.cpp src/TexturePass.h src/Light.h)
+    src/LightPass.cpp src/LightPass.h
+    src/TexturePass.cpp src/TexturePass.h
+    src/Light.h
+    src/ThresholdPass.cpp src/ThresholdPass.h
+    src/BlurPass.cpp src/BlurPass.h
+)
 
 add_executable(deferred
     ../3rdparty/glm
     ${SOURCE_FILES}
     geom.vsh geom.fsh
     light.fsh PassthroughTexture.vsh
-    debug.fsh
+    debug.fsh threshold.fsh
+    blur.fsh
 )
 
 include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
