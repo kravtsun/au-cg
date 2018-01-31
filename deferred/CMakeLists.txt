@@ -26,7 +26,10 @@ file(GLOB COMMON_FILES
     ../common/*.h
 )
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES})
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES}
+    src/GeometryPass.cpp src/GeometryPass.h
+    src/PassCommon.h src/PassCommon.cpp
+        src/LightPass.cpp src/LightPass.h src/TexturePass.cpp src/TexturePass.h src/Light.h)
 
 add_executable(deferred
     ../3rdparty/glm

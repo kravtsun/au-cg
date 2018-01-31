@@ -2,8 +2,14 @@
 #define DEFERRED_GL_LOADER_H
 
 #include <GL/glew.h>
-#include <glfw_window_manager.h>
 #include <memory>
+
+#include "glfw_window_manager.h"
+#include "TexturePass.h"
+#include "GeometryPass.h"
+#include "LightPass.h"
+
+struct Light;
 
 class GLHolder {
 public:
@@ -14,22 +20,14 @@ public:
     virtual ~GLHolder();
     
     static constexpr int maxLightsCount = 10;
-    int lightsCount = maxLightsCount;
+    unsigned int lightsCount = maxLightsCount;
     
-    enum Mode {
-        POSITION,
-        NORMAL,
-        DIFFUSE,
-        AMBIENT,
-        DEFERRED
-    };
-    Mode mode = DEFERRED;
-private:
+//private: // TODO fix privacy leak!
+    std::vector<std::shared_ptr<Light>> lights;
     std::shared_ptr<GLFWWindowManager> window_manager;
-    
-    void geometry_pass();
-    
-    void light_pass();
+    TexturePass texturePass;
+    GeometryPass geometryPass;
+    LightPass lightPass;
 };
 
 

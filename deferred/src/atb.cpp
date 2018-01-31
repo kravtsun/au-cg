@@ -98,16 +98,16 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
     throw_on_atb_error("TwAddVarRw(iterations)");
     
     TwEnumVal modes[] = {
-            {GLHolder::Mode::POSITION, "Position"},
-            {GLHolder::Mode::NORMAL, "Normal"},
-            {GLHolder::Mode::DIFFUSE, "Diffuse"},
-            {GLHolder::Mode::AMBIENT, "Ambient"},
-            {GLHolder::Mode::DEFERRED, "Deferred"},
+            {LightPass::Mode::POSITION, "Position"},
+            {LightPass::Mode::NORMAL, "Normal"},
+            {LightPass::Mode::DIFFUSE, "Diffuse"},
+            {LightPass::Mode::AMBIENT, "Ambient"},
+            {LightPass::Mode::DEFERRED, "Deferred"},
     };
     TwType modeType;
 
     modeType = TwDefineEnum("ModeType", modes, 5);
-    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->mode, NULL);
+    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->lightPass.mode, NULL);
 
 //		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, " step=0.02 ");
 //		throw_on_atb_error("TwAddVarRw(scale)");
