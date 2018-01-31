@@ -273,6 +273,8 @@ void GLHolder::geometry_pass() {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, width, height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     
     glUseProgram(program_id);
     
@@ -318,6 +320,8 @@ void GLHolder::geometry_pass() {
     }
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
+    
+    glDisable(GL_DEPTH_TEST);
 }
 
 static void ambient_render_pass(int texId) {
