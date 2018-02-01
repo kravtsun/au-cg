@@ -19,19 +19,10 @@ struct LightPass : public Pass {
     GLint v_id;
     GLint light_position_id, light_color_id, light_angle_id;
     
-    enum Mode {
-        POSITION,
-        NORMAL,
-        DIFFUSE,
-        AMBIENT,
-        DEFERRED
-    };
-    Mode mode = DEFERRED;
-    
 public:
     LightPass(int width, int height);
     
-    void pass(const GeometryPass &geometryPass,
+    void pass(const GLuint *geometryTextures,
               const TexturePass &texturePass,
               const std::vector<std::shared_ptr<Light>> &lights);
     

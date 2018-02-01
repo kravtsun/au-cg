@@ -65,28 +65,39 @@ void GLHolder::paint() {
     computeMatricesFromInputs(window_manager->window());
     geometry_pass.pass();
     assert(glGetError() == GL_NO_ERROR);
-    
-    // TODO geometry_pass's depthTexture not rendered with texture_pass.
-    auto current_lights = lights;
-    current_lights.resize(lights_count);
-    // TODO use a separate texture_pass for light_pass's pass.
-    light_pass.pass(geometry_pass, texture_pass, current_lights);
-    assert(glGetError() == GL_NO_ERROR);
-
-    if (!pause) {
-        for (auto const &light : lights) {
-            light->step();
-        }
-    }
-
     GLuint result_texture;
-    if (bloom_is_on) {
-        threshold_pass.pass(light_pass.outputTexture(), bloom_threshold);
-        blur_pass.pass(threshold_pass.outputTexture());
-        additive_pass.pass(light_pass.outputTexture(), blur_pass.outputTexture());
-        result_texture = additive_pass.outputTexture();
+    
+    if (mode < DEFERRED) {
+        result_texture = geometry_pass.textures[mode];
     } else {
-        result_texture = light_pass.outputTexture();
+        auto current_lights = lights;
+        current_lights.resize(lights_count);
+        light_pass.pass(geometry_pass.textures, texture_pass, current_lights);
+        assert(glGetError() == GL_NO_ERROR);
+    
+        if (!pause) {
+            for (auto const &light : lights) {
+                light->step();
+            }
+        }
+    
+        if (mode == BLOOM_THRESHOLD || mode == BLOOM_BLUR) {
+            bloom_is_on = true;
+        }
+        if (bloom_is_on) {
+            threshold_pass.pass(light_pass.outputTexture(), bloom_threshold);
+            blur_pass.pass(threshold_pass.outputTexture());
+            additive_pass.pass(light_pass.outputTexture(), blur_pass.outputTexture(), bloom_multiplier);
+            if (mode == BLOOM_THRESHOLD) {
+                result_texture = threshold_pass.outputTexture();
+            } else if (mode == BLOOM_BLUR) {
+                result_texture = blur_pass.outputTexture();
+            } else {
+                result_texture = additive_pass.outputTexture();
+            }
+        } else {
+            result_texture = light_pass.outputTexture();
+        }
     }
     
     // TODO move framebuffer binding to texture_pass.

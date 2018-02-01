@@ -15,9 +15,10 @@ AdditivePass::AdditivePass(int width, int height)
     program_id = load_shaders("PassthroughTexture.vsh", "additive.fsh");
     first_texture_id = glGetUniformLocation(program_id, "firstTexture");
     second_texture_id = glGetUniformLocation(program_id, "secondTexture");
+    second_multiplier_id = glGetUniformLocation(program_id, "secondMultiplier");
 }
 
-void AdditivePass::pass(GLuint firstTexture, GLuint secondTexture) {
+void AdditivePass::pass(GLuint firstTexture, GLuint secondTexture, GLfloat secondMultiplier) {
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glViewport(0, 0, getWidth(), getHeight());
     glUseProgram(program_id);
@@ -29,7 +30,9 @@ void AdditivePass::pass(GLuint firstTexture, GLuint secondTexture) {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, secondTexture);
     glUniform1i(second_texture_id, 1);
-
+    
+    glUniform1f(second_multiplier_id, secondMultiplier);
+    
     drawTexture();
 }
 

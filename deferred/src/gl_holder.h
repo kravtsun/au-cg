@@ -27,8 +27,20 @@ public:
     
     bool bloom_is_on = true;
     GLfloat bloom_threshold = 0.7;
+    GLfloat bloom_multiplier = 1.0;
     
     bool pause = false;
+    
+    enum Mode {
+        POSITION = 0,
+        NORMAL,
+        DIFFUSE,
+        AMBIENT,
+        DEFERRED,
+        BLOOM_THRESHOLD,
+        BLOOM_BLUR
+    };
+    Mode mode = DEFERRED;
     
 //private: // TODO fix privacy leak!
     std::vector<std::shared_ptr<Light>> lights;

@@ -98,16 +98,20 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
     throw_on_atb_error("TwAddVarRw(iterations)");
     
     TwEnumVal modes[] = {
-            {LightPass::Mode::POSITION, "Position"},
-            {LightPass::Mode::NORMAL, "Normal"},
-            {LightPass::Mode::DIFFUSE, "Diffuse"},
-            {LightPass::Mode::AMBIENT, "Ambient"},
-            {LightPass::Mode::DEFERRED, "Deferred"},
+            {GLHolder::Mode::POSITION, "Position"},
+            {GLHolder::Mode::NORMAL, "Normal"},
+            {GLHolder::Mode::DIFFUSE, "Diffuse"},
+            {GLHolder::Mode::AMBIENT, "Ambient"},
+            {GLHolder::Mode::DEFERRED, "Deferred"},
+            {GLHolder::Mode::BLOOM_THRESHOLD, "BloomThreshold"},
+            {GLHolder::Mode::BLOOM_BLUR, "BloomBlur"},
     };
-    const TwType modeType = TwDefineEnum("ModeType", modes, 5);
-    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->light_pass.mode, NULL);
+    const int modesCount = sizeof(modes) / sizeof(modes[0]);
+    const TwType modeType = TwDefineEnum("ModeType", modes, modesCount);
+    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->mode, nullptr);
     TwAddVarRW(impl::myBar, "BloomSwitch", TW_TYPE_BOOLCPP, &gl_holder->bloom_is_on, "label='Bloom switch'");
     TwAddVarRW(impl::myBar, "BloomThreshold", TW_TYPE_FLOAT, &gl_holder->bloom_threshold, "label='Bloom threshold' min=0 max=1 step=0.02");
+    TwAddVarRW(impl::myBar, "BloomMultiplier", TW_TYPE_FLOAT, &gl_holder->bloom_multiplier, "label='Bloom multiplier' min=0 max=3 step=0.02");
     TwAddVarRW(impl::myBar, "PauseAnimation", TW_TYPE_BOOLCPP, &gl_holder->pause, "label='Pause animation'");
 
     GLFWwindow *window = window_manager->window();
