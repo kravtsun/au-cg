@@ -28,6 +28,8 @@ public:
     bool bloom_is_on = true;
     GLfloat bloom_threshold = 0.7;
     
+    bool pause = false;
+    
 //private: // TODO fix privacy leak!
     std::vector<std::shared_ptr<Light>> lights;
     std::shared_ptr<GLFWWindowManager> window_manager;

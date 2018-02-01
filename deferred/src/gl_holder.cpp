@@ -73,6 +73,12 @@ void GLHolder::paint() {
     light_pass.pass(geometry_pass, texture_pass, current_lights);
     assert(glGetError() == GL_NO_ERROR);
 
+    if (!pause) {
+        for (auto const &light : lights) {
+            light->step();
+        }
+    }
+
     GLuint result_texture;
     if (bloom_is_on) {
         threshold_pass.pass(light_pass.outputTexture(), bloom_threshold);

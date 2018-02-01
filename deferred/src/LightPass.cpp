@@ -67,7 +67,6 @@ void LightPass::pass(const GeometryPass &geometryPass,
             PASS_UNIFORM_3F(light_color_id, light->getColor());
             glUniform1f(light_angle_id, light->getAngle());
             drawTexture();
-            light->step();
         }
         
         if (!blendEnabledBefore) {

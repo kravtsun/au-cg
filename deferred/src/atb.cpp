@@ -108,6 +108,7 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
     TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->light_pass.mode, NULL);
     TwAddVarRW(impl::myBar, "BloomSwitch", TW_TYPE_BOOLCPP, &gl_holder->bloom_is_on, "label='Bloom switch'");
     TwAddVarRW(impl::myBar, "BloomThreshold", TW_TYPE_FLOAT, &gl_holder->bloom_threshold, "label='Bloom threshold' min=0 max=1 step=0.02");
+    TwAddVarRW(impl::myBar, "PauseAnimation", TW_TYPE_BOOLCPP, &gl_holder->pause, "label='Pause animation'");
 
     GLFWwindow *window = window_manager->window();
     // after GLFW initialization
