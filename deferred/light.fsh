@@ -78,7 +78,7 @@ void main() {
                                 reflectedLight * specular_color)
                         , vec3(1));
 
-    color = linear_color;
+    color = pow(linear_color, vec3(2.2));
 //    color = ambient_color;
 //    color = texture(positionTexture, UV).xyz;
 }
