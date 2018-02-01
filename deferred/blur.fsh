@@ -38,12 +38,12 @@ const float weight[N] = float[] (
 //);
 
 void main() {
-    vec4 sum_color = vec4(0);
+    vec4 sumColor = vec4(0);
 	for( int i = 0; i < N; i++ )
 	{
 	    vec2 coordinates = UV + delta[i] * step;
-		sum_color += texture(inputTexture, coordinates) * weight[i];
+		sumColor += texture(inputTexture, coordinates) * weight[i];
 	}
 
-    color = sum_color.xyz;
+    color = sumColor.xyz;
 }

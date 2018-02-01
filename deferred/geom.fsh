@@ -1,12 +1,7 @@
 #version 430 core
 
-//layout(location = 0) in vec3 pos;
-//layout(location = 1) in vec3 n;
-
 in vec3 vertexPosition_worldspace; // position.
 in vec3 Normal_cameraspace; // normal.
-//in vec3 vertexColor;
-//varying vec3 n;
 
 uniform vec3 diffuse_color;
 uniform vec3 ambient_color;
@@ -22,10 +17,4 @@ void main (void)
     normal = Normal_cameraspace;
     diffuse = diffuse_color;
     ambient = ambient_color;
-//    color = vertexColor;
-//    vec3 nn = normalize(Normal_cameraspace);
-//    gl_FragData[0] = pos;
-//    gl_FragData[1] = 0.5 * nn + vec3(0.5);
-//    gl_FragData [0] = vec4 (pos, gl_FragDepth);
-//    gl_FragData [1] = vec4 (0.5 * nn + vec3(0.5), 1.0);
 }

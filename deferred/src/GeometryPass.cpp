@@ -23,7 +23,8 @@ void GeometryPass::init_gbuffer() {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
     
     const GLenum DrawBuffers[] = {
-            GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1
+            GL_COLOR_ATTACHMENT0
+            , GL_COLOR_ATTACHMENT1
             , GL_COLOR_ATTACHMENT2
             , GL_COLOR_ATTACHMENT3
     };
@@ -134,4 +135,8 @@ GeometryPass::~GeometryPass() {
     glDeleteProgram(program_id);
     glDeleteTextures(GBUFFER_NUM_TEXTURES, textures);
     glDeleteFramebuffers(1, &fbo);
+}
+
+GLuint GeometryPass::outputTexture() const {
+    assert(false);
 }

@@ -31,15 +31,16 @@ static std::string hex(int num) {
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         : window_manager(window_manager)
-        , geometryPass(window_manager->win_width(), window_manager->win_height())
-        , lightPass(window_manager->win_width(), window_manager->win_height())
-        , texturePass(window_manager->win_width(), window_manager->win_height())
-        , thresholdPass(window_manager->win_width(), window_manager->win_height())
-        , blurPass(window_manager->win_width(), window_manager->win_height())
+        , geometry_pass(window_manager->win_width(), window_manager->win_height())
+        , light_pass(window_manager->win_width(), window_manager->win_height())
+        , texture_pass(window_manager->win_width(), window_manager->win_height())
+        , threshold_pass(window_manager->win_width(), window_manager->win_height())
+        , blur_pass(window_manager->win_width(), window_manager->win_height())
+        , additive_pass(window_manager->win_width(), window_manager->win_height())
 {
     assert(glGetError() == GL_NO_ERROR);
     glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
-    geometryPass.load_scene("sagar.obj");
+    geometry_pass.load_scene("sagar.obj");
     
     lights.push_back(std::make_shared<StationaryLight>());
     lights.push_back(std::make_shared<LissajousLight>(1, 2));
@@ -62,24 +63,32 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
 
 void GLHolder::paint() {
     computeMatricesFromInputs(window_manager->window());
-    geometryPass.pass();
+    geometry_pass.pass();
     assert(glGetError() == GL_NO_ERROR);
     
-    // TODO geometryPass's depthTexture not rendered with texturePass.
-    auto currentLights = lights;
-    currentLights.resize(lightsCount);
-    // TODO use a separate texturePass for lightPass's pass.
-    lightPass.pass(geometryPass, texturePass, currentLights);
+    // TODO geometry_pass's depthTexture not rendered with texture_pass.
+    auto current_lights = lights;
+    current_lights.resize(lights_count);
+    // TODO use a separate texture_pass for light_pass's pass.
+    light_pass.pass(geometry_pass, texture_pass, current_lights);
     assert(glGetError() == GL_NO_ERROR);
+
+    GLuint result_texture;
+    if (bloom_is_on) {
+        threshold_pass.pass(light_pass.outputTexture(), bloom_threshold);
+        blur_pass.pass(threshold_pass.outputTexture());
+        additive_pass.pass(light_pass.outputTexture(), blur_pass.outputTexture());
+        result_texture = additive_pass.outputTexture();
+    } else {
+        result_texture = light_pass.outputTexture();
+    }
     
-    thresholdPass.pass(lightPass.color_texture, 0.7);
-    blurPass.pass(thresholdPass.mask_texture);
-    
-    // TODO move framebuffer binding to texturePass.
+    // TODO move framebuffer binding to texture_pass.
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, window_manager->win_width(), window_manager->win_height());
-//    texturePass.pass(thresholdPass.mask_texture);
-    texturePass.pass(blurPass.outputTexture());
+//    texture_pass.pass(threshold_pass.mask_texture);
+    texture_pass.pass(result_texture);
+    assert(glGetError() == GL_NO_ERROR);
 }
 
 GLHolder::~GLHolder() = default;

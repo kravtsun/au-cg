@@ -31,6 +31,8 @@ public:
     
     void pass();
     
+    GLuint outputTexture() const override;
+    
     virtual ~GeometryPass();
     
 private:

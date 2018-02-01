@@ -1,3 +1,4 @@
+#include <cassert>
 #include "PassCommon.h"
 
 void init_texture(const int width, const int height, const GLuint texture, const int attachment) {
@@ -13,6 +14,21 @@ void init_texture(const int width, const int height, const GLuint texture, const
     if (attachment != -1) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, (GLenum) attachment, GL_TEXTURE_2D, texture, 0);
     }
+}
+
+void Pass::init_output_texture(GLuint &texture) {
+    glGenTextures(1, &texture);
+    init_texture(getWidth(), getHeight(), texture, GL_COLOR_ATTACHMENT0);
+    
+    const GLenum DrawBuffers[] = {
+            GL_COLOR_ATTACHMENT0
+    };
+    const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
+    static_assert(drawBuffersCount == 1, "drawBuffersCount == 1");
+    glDrawBuffers(drawBuffersCount, DrawBuffers);
+    
+    const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
 }
 
 static const GLfloat quadz = 1.0f;

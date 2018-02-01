@@ -6,19 +6,7 @@
 void ThresholdPass::init_mask_render_buffer() {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    
-    glGenTextures(1, &mask_texture);
-    init_texture(getWidth(), getHeight(), mask_texture, GL_COLOR_ATTACHMENT0);
-    
-    const GLenum DrawBuffers[] = {
-            GL_COLOR_ATTACHMENT0
-    };
-    const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
-    static_assert(drawBuffersCount == 1, "drawBuffersCount == 1");
-    glDrawBuffers(drawBuffersCount, DrawBuffers);
-    
-    const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
+    init_output_texture(mask_texture);
 }
 
 ThresholdPass::ThresholdPass(int width, int height)
@@ -46,4 +34,8 @@ void ThresholdPass::pass(GLuint colorTexture, GLfloat threshold) {
 ThresholdPass::~ThresholdPass() {
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &mask_texture);
+}
+
+GLuint ThresholdPass::outputTexture() const {
+    return mask_texture;
 }

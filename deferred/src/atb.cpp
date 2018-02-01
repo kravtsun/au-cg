@@ -93,8 +93,8 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
     tw_error = TwWindowSize(window_manager->win_width(), window_manager->win_height());
     throw_on_atb_error("TwWindowSize");
 
-    auto lightsCount = "label='lightsCount' min=0 max=" + std::to_string(GLHolder::maxLightsCount);
-    tw_error = TwAddVarRW(impl::myBar, "lightsCount", TW_TYPE_UINT32, &gl_holder->lightsCount, lightsCount.c_str());
+    auto lightsCount = "label='lights_count' min=0 max=" + std::to_string(GLHolder::max_lights_count);
+    tw_error = TwAddVarRW(impl::myBar, "lights_count", TW_TYPE_UINT32, &gl_holder->lights_count, lightsCount.c_str());
     throw_on_atb_error("TwAddVarRw(iterations)");
     
     TwEnumVal modes[] = {
@@ -104,14 +104,11 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
             {LightPass::Mode::AMBIENT, "Ambient"},
             {LightPass::Mode::DEFERRED, "Deferred"},
     };
-    TwType modeType;
+    const TwType modeType = TwDefineEnum("ModeType", modes, 5);
+    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->light_pass.mode, NULL);
+    TwAddVarRW(impl::myBar, "BloomSwitch", TW_TYPE_BOOLCPP, &gl_holder->bloom_is_on, "label='Bloom switch'");
+    TwAddVarRW(impl::myBar, "BloomThreshold", TW_TYPE_FLOAT, &gl_holder->bloom_threshold, "label='Bloom threshold' min=0 max=1 step=0.02");
 
-    modeType = TwDefineEnum("ModeType", modes, 5);
-    TwAddVarRW(impl::myBar, "Mode", modeType, &gl_holder->lightPass.mode, NULL);
-
-//		tw_error = TwAddVarRW(impl::myBar, "scale", TW_TYPE_DOUBLE, &point_transformer->scale, " step=0.02 ");
-//		throw_on_atb_error("TwAddVarRw(scale)");
-    
     GLFWwindow *window = window_manager->window();
     // after GLFW initialization
     // directly redirect GLFW events to AntTweakBar

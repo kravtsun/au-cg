@@ -34,7 +34,7 @@ set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES}
     src/Light.h
     src/ThresholdPass.cpp src/ThresholdPass.h
     src/BlurPass.cpp src/BlurPass.h
-)
+    src/AdditivePass.cpp src/AdditivePass.h)
 
 add_executable(deferred
     ../3rdparty/glm

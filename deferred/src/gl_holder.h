@@ -10,6 +10,7 @@
 #include "LightPass.h"
 #include "ThresholdPass.h"
 #include "BlurPass.h"
+#include "AdditivePass.h"
 
 struct Light;
 
@@ -21,17 +22,21 @@ public:
     
     virtual ~GLHolder();
     
-    static constexpr int maxLightsCount = 10;
-    unsigned int lightsCount = maxLightsCount;
+    static constexpr int max_lights_count = 10;
+    unsigned int lights_count = max_lights_count;
+    
+    bool bloom_is_on = true;
+    GLfloat bloom_threshold = 0.7;
     
 //private: // TODO fix privacy leak!
     std::vector<std::shared_ptr<Light>> lights;
     std::shared_ptr<GLFWWindowManager> window_manager;
-    TexturePass texturePass;
-    GeometryPass geometryPass;
-    LightPass lightPass;
-    ThresholdPass thresholdPass;
-    BlurPass blurPass;
+    TexturePass texture_pass;
+    GeometryPass geometry_pass;
+    LightPass light_pass;
+    ThresholdPass threshold_pass;
+    BlurPass blur_pass;
+    AdditivePass additive_pass;
 };
 
 

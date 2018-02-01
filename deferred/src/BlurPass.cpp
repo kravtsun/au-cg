@@ -8,18 +8,7 @@ void BlurPass::init_blur(GLuint &fbo, GLuint &output_texture)
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     
-    glGenTextures(1, &output_texture);
-    init_texture(getWidth(), getHeight(), output_texture, GL_COLOR_ATTACHMENT0);
-    
-    const GLenum DrawBuffers[] = {
-            GL_COLOR_ATTACHMENT0
-    };
-    const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
-    static_assert(drawBuffersCount == 1, "drawBuffersCount == 1");
-    glDrawBuffers(drawBuffersCount, DrawBuffers);
-    
-    const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
+    init_output_texture(output_texture);
 }
 
 BlurPass::BlurPass(int width, int height)
@@ -59,4 +48,8 @@ BlurPass::~BlurPass() {
     glDeleteTextures(1, &outputh);
     glDeleteFramebuffers(1, &fbov);
     glDeleteTextures(1, &outputv);
+}
+
+GLuint BlurPass::outputTexture() const {
+    return outputv;
 }

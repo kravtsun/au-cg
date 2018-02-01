@@ -25,9 +25,12 @@ struct Pass {
         return height;
     }
     
+    virtual GLuint outputTexture() const = 0;
+    
     virtual ~Pass();
 
 protected:
+    void init_output_texture(GLuint &texture);
     
     void drawTexture() const;
 private:

@@ -8,22 +8,7 @@
 void LightPass::init_light_render_buffer() {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    
-    glGenTextures(1, &color_texture);
-    init_texture(getWidth(), getHeight(), color_texture, GL_COLOR_ATTACHMENT0);
-    
-    const GLenum DrawBuffers[] = {
-            GL_COLOR_ATTACHMENT0
-//            , GL_COLOR_ATTACHMENT1
-//            , GL_COLOR_ATTACHMENT2
-//            , GL_COLOR_ATTACHMENT3
-    };
-    const GLsizei drawBuffersCount = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
-    static_assert(drawBuffersCount == 1, "drawBuffersCount == 1");
-    glDrawBuffers(drawBuffersCount, DrawBuffers);
-    
-    const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);    
+    init_output_texture(color_texture);
 }
 
 LightPass::LightPass(int width, int height)
@@ -96,4 +81,8 @@ LightPass::~LightPass() {
     glDeleteProgram(program_id);
     glDeleteTextures(1, &color_texture);
     glDeleteFramebuffers(1, &fbo);
+}
+
+GLuint LightPass::outputTexture() const {
+    return color_texture;
 }

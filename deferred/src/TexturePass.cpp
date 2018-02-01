@@ -1,7 +1,10 @@
+#include <cassert>
 #include "TexturePass.h"
 #include "shader.h"
 
-TexturePass::TexturePass(int width, int height) : Pass(width, height) {
+TexturePass::TexturePass(int width, int height)
+        : Pass(width, height)
+{
     program_id = load_shaders("PassthroughTexture.vsh", "debug.fsh");
     texture_id = glGetUniformLocation(program_id, "renderedTexture");
 }
@@ -18,4 +21,8 @@ void TexturePass::pass(GLuint texture) const {
 
 TexturePass::~TexturePass() {
     glDeleteProgram(program_id);
+}
+
+GLuint TexturePass::outputTexture() const {
+    assert(false);
 }

@@ -15,6 +15,8 @@ public:
 
     void pass(GLuint colorTexture, GLfloat threshold);
     
+    GLuint outputTexture() const override;
+    
     virtual ~ThresholdPass();
     
 private:

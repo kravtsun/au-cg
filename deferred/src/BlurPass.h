@@ -16,9 +16,7 @@ public:
 
     void pass(GLuint inputTexture);
     
-    GLuint outputTexture() const {
-        return outputv;
-    }
+    GLuint outputTexture() const override;
     
     virtual ~BlurPass();
     

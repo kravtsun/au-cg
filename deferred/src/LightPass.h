@@ -10,8 +10,6 @@ struct Light;
 struct LightPass : public Pass {
     GLuint fbo;
     GLuint program_id;
-    GLuint quad_vertexbuffer;
-// light pass variables.
     GLint position_texture_id, normal_texture_id;
     GLint diffuse_texture_id, ambient_texture_id;
     
@@ -36,6 +34,8 @@ public:
     void pass(const GeometryPass &geometryPass,
               const TexturePass &texturePass,
               const std::vector<std::shared_ptr<Light>> &lights);
+    
+    GLuint outputTexture() const override;
     
     virtual ~LightPass();
 private:
