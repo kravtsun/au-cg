@@ -129,6 +129,7 @@ static GLint diffuse_texture_id, ambient_texture_id;
 static GLint specular_color_id;
 static GLint v_id;
 static GLint light_position_id, light_color_id, light_angle_id;
+static GLint screen_gamma_id;
 }
 
 namespace ambient_render {
@@ -224,6 +225,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     light::light_position_id = glGetUniformLocation(light::program_id, "lightPos");
     light::light_color_id = glGetUniformLocation(light::program_id, "lightColor");
     light::light_angle_id = glGetUniformLocation(light::program_id, "lightAngle");
+    light::screen_gamma_id = glGetUniformLocation(light::program_id, "screenGamma");
     
     static const GLfloat quadz = 1.0f;
     static const GLfloat g_quad_vertex_buffer_data[] = {
@@ -391,6 +393,8 @@ void GLHolder::light_pass() {
         bool blendEnabledBefore = glIsEnabled(GL_BLEND);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
+        
+        glUniform1f(screen_gamma_id, screenGamma);
     
         for (int i = 0; i < lightsCount && i < static_cast<int>(lights.size()); ++i) {
             auto const &light = lights[i];

@@ -16,6 +16,8 @@ public:
     static constexpr int maxLightsCount = 10;
     int lightsCount = maxLightsCount;
     
+    float screenGamma = 2.2;
+    
     enum Mode {
         POSITION,
         NORMAL,

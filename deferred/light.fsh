@@ -15,6 +15,7 @@ uniform mat4 V;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform float lightAngle;
+uniform float screenGamma;
 
 const float shininess = 16.0;
 
@@ -29,11 +30,7 @@ float sqr(in float x) {
 float light_cone_coefficient(in vec3 position) {
     vec3 lightPosProj = vec3(lightPos.x, position.y, lightPos.z);
     float a = distance(lightPos, lightPosProj);
-//    float b = distance(lightPos, position);
     float c = distance(lightPosProj, position);
-//    float cos_beta = (a*a + b*b - c*c) / (2 * a * b);
-//    float beta = acos(cos_beta);
-//    return beta <= lightAngle / 2.0;
     float beta = a > 0 ? atan(c / a) : M_PI_2;
     return beta <= lightAngle / 2.0 ? 1.0 : max(0.0, 1 - (beta - (lightAngle / 2.0)) / lightAngleDelta);
 }
@@ -60,25 +57,17 @@ void main() {
 
     if(lambertian > 0.0) {
         vec3 viewDir = normalize(EyeDirection_cameraspace);
-        // this is blinn phong
         vec3 halfDir = normalize(lightDir + viewDir);
         float specAngle = max(dot(halfDir, normal), 0.0);
         specular = pow(specAngle, shininess);
     }
 
-    // TODO blending.
-//    scatteredLight += lambertian * lightColor;
-//    reflectedLight += specular * lightColor;
     vec3 scatteredLight = lambertian * lightColor;
     vec3 reflectedLight = specular * lightColor;
     vec3 linear_color = min(
-//                            ambient_color +
                             light_cone_coefficient(vertexPosition_worldspace) *
                                 (scatteredLight * diffuse_color +
                                 reflectedLight * specular_color)
                         , vec3(1));
-
-    color = pow(linear_color, vec3(2.2));
-//    color = ambient_color;
-//    color = texture(positionTexture, UV).xyz;
+    color = pow(linear_color, vec3(1 / screenGamma));
 }

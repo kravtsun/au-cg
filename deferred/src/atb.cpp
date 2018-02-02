@@ -95,7 +95,11 @@ void init(std::shared_ptr<GLFWWindowManager> window_manager, std::shared_ptr<GLH
 
     auto lightsCount = "label='lightsCount' min=0 max=" + std::to_string(GLHolder::maxLightsCount);
     tw_error = TwAddVarRW(impl::myBar, "lightsCount", TW_TYPE_UINT32, &gl_holder->lightsCount, lightsCount.c_str());
-    throw_on_atb_error("TwAddVarRw(iterations)");
+    throw_on_atb_error("TwAddVarRw(lightsCount)");
+    
+    auto screenGammaString = "label='screenGamma' min=0.1 max=3.0 step=0.1";
+    tw_error = TwAddVarRW(impl::myBar, "screenGamma", TW_TYPE_FLOAT, &gl_holder->screenGamma, screenGammaString);
+    throw_on_atb_error("TwAddVarRw(screenGamma)");
     
     TwEnumVal modes[] = {
             {GLHolder::Mode::POSITION, "Position"},
