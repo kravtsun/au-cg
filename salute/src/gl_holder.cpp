@@ -19,8 +19,9 @@ using namespace glm;
         glUniformMatrix4fv(id, 1, GL_FALSE, &(stable_value)[0][0]); \
     } while (false);
 
+static const float SPEED_MAGNITUDE = 30.f;
 
-static vec3 camera_position{0, 0, 10};
+static vec3 camera_position{0, 0, 1};
 static vec3 direction{0, 0, -1};
 static vec3 up{0, 1, 0};
 static vec3 right{1, 0, 0};
@@ -48,10 +49,10 @@ static inline T rand_range(T a, T b) {
 
 
 static const GLfloat g_vertex_buffer_data[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f,
-        0.5f,  0.5f, 0.0f,
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f, 0.0f,
 };
 //static const GLfloat g_vertex_buffer_data[] = {
 //        -1.0f, -1.0f, 0.0f,
@@ -82,6 +83,8 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         for (int j = 0; j < 3; ++j) {
             speed[i][j] = rand_range<float>(-1.0, 1.0);
         }
+        
+        speed[i] = glm::normalize(speed[i]) * SPEED_MAGNITUDE;
     }
     
     glGenBuffers(1, &square_buffer);
@@ -95,7 +98,8 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
 }
 
 static float time_after_explosion = 0.f;
-static const float time_delta = 1.0;
+static const float FPS = 60.f;
+static const float time_delta = 1.f / FPS;
 
 void GLHolder::paint() {
     if (glfwGetKey(window_manager->window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
@@ -104,13 +108,13 @@ void GLHolder::paint() {
     
 // Projection matrix : 45 Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
 //    auto projection = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
-    const float limit = 10.f;
+    const float limit = 100.f;
     const float zNear = 0.1f, zFar = 100.f;
     const float xLeft = -limit, xRight = limit;
     const float yBottom = -limit, yTop = limit;
     
     auto projection = glm::ortho(xLeft, xRight, yBottom, yTop, zNear, zFar);
-    auto view = glm::lookAt(camera_position, vec3(0, 0, 0), up);
+    auto view = glm::lookAt(camera_position, camera_position + direction, up);
     auto pv = projection * view;
     
     glUseProgram(program_id);
@@ -120,7 +124,7 @@ void GLHolder::paint() {
     
     PASS_UNIFORM_3F(particle_start_id, vec3(0, 0, 0));
     PASS_UNIFORM_3F(particle_color_id, vec3(1, 1, 1));
-    glUniform1f(particle_size_id, 0.2);
+    glUniform1f(particle_size_id, 0.6);
     glUniform1f(time_after_explosion_id, time_after_explosion);
     if (!isPaused) {
         time_after_explosion += time_delta;
@@ -131,6 +135,7 @@ void GLHolder::paint() {
     glViewport(0, 0, window_manager->win_width(), window_manager->win_height());
 //    glViewport(0, 0, 320, 240);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable (GL_BLEND); glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     glBindVertexArray(vao);
     
