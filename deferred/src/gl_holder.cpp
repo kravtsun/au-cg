@@ -202,7 +202,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     geom::diffuse_color_id = glGetUniformLocation(geom::program_id, "diffuse_color");
     geom::ambient_color_id = glGetUniformLocation(geom::program_id, "ambient_color");
 //    vertex_color_id = glGetUniformLocation(geom::program_id, "vertexColor");
-    scene = std::make_shared<Scene>("sagar.obj");
+    scene = std::make_shared<Scene>("../misc/sagar.obj");
     
     glGenBuffers(1, &geom::vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, geom::vertexbuffer);

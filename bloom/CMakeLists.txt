@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(deferred)
+project(bloom)
 
 # Setting old compiler as 6.3 gets to C++-17 standard despite 'set(CMAKE_CXX_STANDARD 11)'
 #set(CMAKE_C_COMPILER "/usr/bin/gcc-4.8")
@@ -36,7 +36,7 @@ set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES}
     src/BlurPass.cpp src/BlurPass.h
     src/AdditivePass.cpp src/AdditivePass.h)
 
-add_executable(deferred
+add_executable(bloom
     ../3rdparty/glm
     ${SOURCE_FILES}
     geom.vsh geom.fsh
@@ -47,7 +47,7 @@ add_executable(deferred
 
 include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 
-target_link_libraries(deferred -lassimp)
-target_link_libraries(deferred -lGLEW -lGLU -lGL)
-target_link_libraries(deferred glfw)
-target_link_libraries(deferred AntTweakBar)
+target_link_libraries(bloom -lassimp)
+target_link_libraries(bloom -lGLEW -lGLU -lGL)
+target_link_libraries(bloom glfw)
+target_link_libraries(bloom AntTweakBar)

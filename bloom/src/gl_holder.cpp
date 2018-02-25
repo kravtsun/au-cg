@@ -40,7 +40,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
 {
     assert(glGetError() == GL_NO_ERROR);
     glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
-    geometry_pass.load_scene("sagar.obj");
+    geometry_pass.load_scene("../misc/sagar.obj");
     
     lights.push_back(std::make_shared<StationaryLight>());
     lights.push_back(std::make_shared<LissajousLight>(1, 2));

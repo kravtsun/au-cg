@@ -45,7 +45,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
     
     camera_position_id = glGetUniformLocation(program_id, "cameraPos");
     
-    scene = std::make_shared<Scene>("scene.obj", 30000);
+    scene = std::make_shared<Scene>("../misc/scene.obj", 30000);
     
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
