@@ -13,6 +13,8 @@ struct AdditivePass : public Pass {
 public:
     AdditivePass(int width, int height);
     
+    virtual ~AdditivePass();
+    
     void pass(GLuint firstTexture, GLuint secondTexture, GLfloat secondMultiplier=1.0f);
     
     GLuint outputTexture() const override;

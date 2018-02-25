@@ -71,6 +71,6 @@ void Pass::drawTexture() const {
 }
 
 Pass::~Pass() {
-    glGenVertexArrays(1, &quad_VertexArrayID);
+    glDeleteVertexArrays(1, &quad_VertexArrayID);
     glDeleteBuffers(1, &quad_vertexbuffer);
 }

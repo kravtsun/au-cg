@@ -9,15 +9,13 @@ void GeometryPass::init_gbuffer() {
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     
-    // Создаем текстуры gbuffer
     glGenTextures(GBUFFER_NUM_TEXTURES, textures);
     glGenTextures(1, &depth_texture);
     
     for (unsigned int i = 0; i < GBUFFER_NUM_TEXTURES; i++) {
         init_texture(getWidth(), getHeight(), textures[i], GL_COLOR_ATTACHMENT0 + i);
     }
-
-//    init_texture(width, height, depth_texture, GL_DEPTH_ATTACHMENT);
+    
     glBindTexture(GL_TEXTURE_2D, depth_texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, getWidth(), getHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
@@ -52,7 +50,6 @@ GeometryPass::GeometryPass(int width, int height)
     v_id = glGetUniformLocation(program_id, "V");
     diffuse_color_id = glGetUniformLocation(program_id, "diffuse_color");
     ambient_color_id = glGetUniformLocation(program_id, "ambient_color");
-//    vertex_color_id = glGetUniformLocation(program_id, "vertexColor");
 }
 
 void GeometryPass::load_scene(const std::string &scene_path) {
@@ -134,6 +131,7 @@ GeometryPass::~GeometryPass() {
     glDeleteVertexArrays(1, &vertex_array_id);
     glDeleteProgram(program_id);
     glDeleteTextures(GBUFFER_NUM_TEXTURES, textures);
+    glDeleteTextures(1, &depth_texture);
     glDeleteFramebuffers(1, &fbo);
 }
 

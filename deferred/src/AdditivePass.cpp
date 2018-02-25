@@ -39,3 +39,9 @@ void AdditivePass::pass(GLuint firstTexture, GLuint secondTexture, GLfloat secon
 GLuint AdditivePass::outputTexture() const {
     return sum_texture;
 }
+
+AdditivePass::~AdditivePass() {
+    glDeleteProgram(program_id);
+    glDeleteTextures(1, &sum_texture);
+    glDeleteFramebuffers(1, &fbo);
+}

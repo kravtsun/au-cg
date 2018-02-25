@@ -32,6 +32,7 @@ void ThresholdPass::pass(GLuint colorTexture, GLfloat threshold) {
 }
 
 ThresholdPass::~ThresholdPass() {
+    glDeleteProgram(program_id);
     glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &mask_texture);
 }

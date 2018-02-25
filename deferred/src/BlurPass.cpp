@@ -44,6 +44,7 @@ void BlurPass::pass(GLuint inputTexture) {
 }
 
 BlurPass::~BlurPass() {
+    glDeleteProgram(program_id);
     glDeleteFramebuffers(1, &fboh);
     glDeleteTextures(1, &outputh);
     glDeleteFramebuffers(1, &fbov);
