@@ -15,7 +15,6 @@ add_subdirectory(../3rdparty/AntTweakBar ../3rdparty/AntTweakBar/lib)
 set_target_properties(AntTweakBar PROPERTIES LINKER_LANGUAGE CXX)
 
 
-AUX_SOURCE_DIRECTORY(../common/ COMMON_FILES)
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
 set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} )
 
@@ -24,7 +23,9 @@ add_executable(fractal
         ${SOURCE_FILES}
         texture.fsh
         transform.vsh
-        src/points.cpp src/points.h)
+        ../common/shader.h ../common/shader.cpp
+        ../common/glfw_window_manager.h ../common/glfw_window_manager.cpp
+)
 
 include_directories(src ../common ../3rdparty/AntTweakBar/include ../3rdparty/glm)
 

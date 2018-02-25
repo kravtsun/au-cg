@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "texture_loader.h"
-#include "shader.hpp"
+#include "shader.h"
 
 GLHolder::GLHolder(PointTransformer *point_transformer) : point_transformer_(point_transformer)
 {
