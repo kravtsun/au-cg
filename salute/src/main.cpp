@@ -15,6 +15,8 @@ int main() {
     
     clock_t begin = 0, end = 0;
     
+    int cnt = 0;
+    
     window_manager->main_loop([&]() {
         ammortization_time = end - begin;
         begin = clock();
@@ -24,6 +26,7 @@ int main() {
         auto elapsed_secs = double(end - begin + ammortization_time) / CLOCKS_PER_SEC;
         const double paint_time = double(end - begin) / CLOCKS_PER_SEC;
         std::cout << paint_time * 1000 << "ms" << std::endl;
+//        std::cout << cnt++ << std::endl;
         auto wait_time_in_secs = FRAME_TIME - elapsed_secs;
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;
         if (wait_time_in_usecs >= 1) {

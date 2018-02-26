@@ -4,7 +4,7 @@
 in vec2 fragment_coords; // coords inside a particle's circle (for fading effect).
 in vec3 particle_color;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 //uniform sampler2D myTextureSampler;
 
