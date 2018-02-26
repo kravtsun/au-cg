@@ -30,9 +30,7 @@ PassthroughPass::PassthroughPass(const int width, const int height, bool direct)
 }
 
 void PassthroughPass::pass() {
-    if (input_texture == static_cast<GLuint>(-1)) {
-        throw std::logic_error("Error in PassthroughPass: Input texture not set.");
-    }
+    check_input_texture_set();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     glUseProgram(program_id);
@@ -70,4 +68,10 @@ void PassthroughPass::draw_quad() const {
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(0);
+}
+
+void PassthroughPass::check_input_texture_set(const std::string &caller) const {
+    if (get_input_texture() == static_cast<GLuint>(-1)) {
+        throw std::logic_error("Error in " + caller + ": Input texture not set.");
+    }
 }

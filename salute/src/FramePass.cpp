@@ -87,9 +87,7 @@ void FramePass::pass() {
     PASS_UNIFORM_3F(particle_color_id, vec3(1, 1, 1));
     glUniform1f(particle_size_id, 0.6);
     glUniform1f(time_after_explosion_id, time_after_explosion);
-    if (!isPaused) {
-        time_after_explosion += time_delta;
-    }
+    time_after_explosion += time_delta;
 
 //    computeMatricesFromInputs(window_manager->window());
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -97,7 +95,8 @@ void FramePass::pass() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc (GL_SRC_ALPHA, GL_ZERO);
+//    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     glBindVertexArray(vao);
     
@@ -126,4 +125,13 @@ FramePass::~FramePass() {
     glDeleteBuffers(1, &square_buffer);
     glDeleteVertexArrays(1, &vao);
     glDeleteProgram(program_id);
+}
+
+void FramePass::reset() {
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glViewport(0, 0, get_width(), get_height());
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    time_after_explosion = 0;
 }

@@ -1,12 +1,12 @@
 #include <memory>
 #include <cassert>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
-#include "gl_holder.h"
-
-#include "shader.h"
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
+#include "glfw_window_manager.h"
+#include "gl_holder.h"
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         : window_manager(window_manager)
@@ -22,8 +22,17 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
 }
 
 void GLHolder::paint() {
+    static bool isPaused = false;
     if (glfwGetKey(window_manager->window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
-        frame_pass.isPaused = !frame_pass.isPaused;
+        isPaused = !isPaused;
+    }
+    if (isPaused) {
+        return;
+    }
+    
+    if (glfwGetKey(window_manager->window(), GLFW_KEY_ENTER) == GLFW_PRESS) {
+        frame_pass.reset();
+        frame_combiner_pass.reset();
     }
     
     frame_pass.pass();
@@ -36,5 +45,13 @@ void GLHolder::paint() {
 }
 
 GLHolder::~GLHolder() {
+}
+
+int GLHolder::width() const {
+    return window_manager->win_width();
+}
+
+int GLHolder::height() const {
+    return window_manager->win_height();
 }
 

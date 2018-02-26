@@ -4,22 +4,19 @@
 #include <GL/glew.h>
 #include <memory>
 
-#include "glfw_window_manager.h"
 #include "FramePass.h"
 #include "PassthroughPass.h"
 #include "FrameCombinerPass.h"
+
+struct GLFWWindowManager;
 
 class GLHolder {
 public:
     explicit GLHolder(std::shared_ptr<GLFWWindowManager> window_manager);
     
-    int width() const {
-        return window_manager->win_width();
-    }
+    int width() const;
     
-    int height() const {
-        return window_manager->win_height();
-    }
+    int height() const;
     
     virtual void paint();
     

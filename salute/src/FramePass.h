@@ -10,13 +10,13 @@ struct FramePass : public AbstractPass {
 
     void pass() override;
 
-    bool isPaused = false;
-    
     ~FramePass() final;
     
     GLuint output_texture() const override {
         return color_texture;
     }
+    
+    void reset();
     
 private:
     GLuint program_id;
@@ -31,9 +31,9 @@ private:
     GLuint color_texture, depth_texture;
     GLuint color_buffer;
     
-    float time_after_explosion = 0.f;
     static constexpr float FPS = 60.f;
     static constexpr float time_delta = 1.f / FPS;
+    float time_after_explosion = 0.f;
 };
 
 

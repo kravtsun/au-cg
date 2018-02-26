@@ -29,6 +29,8 @@ protected:
     GLuint get_input_texture() const {
         return input_texture;
     }
+    
+    void check_input_texture_set(const std::string &caller="PassthroughPass") const;
 
 private:
     bool is_direct;

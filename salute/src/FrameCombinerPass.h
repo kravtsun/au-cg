@@ -12,6 +12,8 @@ struct FrameCombinerPass : public PassthroughPass {
     
     void pass() override;
     
+    void reset();
+    
     ~FrameCombinerPass() final;
     
 private:

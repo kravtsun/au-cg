@@ -9,6 +9,7 @@ layout(location = 1) in vec3 speed;
 //out vec2 UV;
 out vec2 fragment_coords;
 out vec3 particle_color;
+out float fade_multiplier;
 
 uniform vec3 ParticleStart_worldspace;
 uniform vec3 ParticleColor;
@@ -35,8 +36,6 @@ float sqr(in float x) {
 
 void main()
 {
-//	float particleSize = xyzs.w; // because we encoded it this way.
-//	vec3 particleCenter_wordspace = xyzs.xyz;
     vec3 g = vec3(0, -9.8, 0) * gravity_coefficient;
 
     vec3 speed_deceleration = -speed * deceleration_coefficient;
@@ -66,10 +65,10 @@ void main()
     fragment_coords = squareVertices.xy;
 
     float time_normalized = TimeAfterExplosion / seconds_to_decelerate;
-    float fade_multiplier = 1.0;
+    fade_multiplier = 1.0;
     if (time_normalized > fade_start_time_normalized) {
         fade_multiplier = exp(-fade_speed * sqr(time_normalized - fade_start_time_normalized));
     }
-	particle_color = ParticleColor * fade_multiplier;
+    particle_color = ParticleColor;
 }
 
