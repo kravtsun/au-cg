@@ -35,6 +35,13 @@ static const GLfloat g_vertex_buffer_data[] = {
         1.0f,  1.0f, 0.0f,
 };
 
+ProgramWrapper FramePass::program;
+GLint FramePass::camera_up_id, FramePass::camera_right_id;
+GLint FramePass::vp_id;
+
+GLint FramePass::particle_start_id, FramePass::particle_color_id, FramePass::particle_size_id,
+        FramePass::time_after_explosion_id, FramePass::fade_multiplier_id, FramePass::seconds_to_decelerate_id;
+
 FramePass::FramePass(int width, int height,
                      const glm::vec3 &particle_start,
                      const glm::vec3 &particle_color)
@@ -42,16 +49,18 @@ FramePass::FramePass(int width, int height,
     , particle_start(particle_start)
     , particle_color(particle_color)
 {
-    program.reset(new Program("particle.vsh", "particle.fsh"));
-    camera_up_id = glGetUniformLocation(*program, "CameraUp_worldspace");
-    camera_right_id = glGetUniformLocation(*program, "CameraRight_worldspace");
-    vp_id = glGetUniformLocation(*program, "VP");
-    particle_start_id = glGetUniformLocation(*program, "ParticleStart_worldspace");
-    particle_color_id = glGetUniformLocation(*program, "ParticleColor");
-    particle_size_id = glGetUniformLocation(*program, "ParticleSize");
-    time_after_explosion_id = glGetUniformLocation(*program, "TimeAfterExplosion");
-    fade_multiplier_id = glGetUniformLocation(*program, "fade_multiplier");
-    seconds_to_decelerate_id = glGetUniformLocation(*program, "seconds_to_decelerate");
+    if (program == nullptr) {
+        program.reset(new Program("particle.vsh", "particle.fsh"));
+        camera_up_id = glGetUniformLocation(*program, "CameraUp_worldspace");
+        camera_right_id = glGetUniformLocation(*program, "CameraRight_worldspace");
+        vp_id = glGetUniformLocation(*program, "VP");
+        particle_start_id = glGetUniformLocation(*program, "ParticleStart_worldspace");
+        particle_color_id = glGetUniformLocation(*program, "ParticleColor");
+        particle_size_id = glGetUniformLocation(*program, "ParticleSize");
+        time_after_explosion_id = glGetUniformLocation(*program, "TimeAfterExplosion");
+        fade_multiplier_id = glGetUniformLocation(*program, "fade_multiplier");
+        seconds_to_decelerate_id = glGetUniformLocation(*program, "seconds_to_decelerate");
+    }
     
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);

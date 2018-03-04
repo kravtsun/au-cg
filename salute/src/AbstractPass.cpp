@@ -26,6 +26,7 @@ void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo,
     
     fbo = std::make_shared<Framebuffer>();
     fbo->bind();
+    glViewport(0, 0, get_width(), get_height());
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *color_texture, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -22,24 +22,27 @@ struct FramePass : public AbstractPass {
     
     void reset();
     
+    float get_fade_multiplier() const;
+    
     static constexpr float limit = 100.f;
     static constexpr float FPS = 60.f;
     
 private:
     glm::vec3 particle_start, particle_color;
     
-    ProgramWrapper program;
-    GLint camera_up_id, camera_right_id;
-    GLint vp_id;
+    static ProgramWrapper program;
+    static GLint camera_up_id, camera_right_id;
+    static GLint vp_id;
     
-    GLint particle_start_id, particle_color_id, particle_size_id,
+    static GLint particle_start_id, particle_color_id, particle_size_id,
             time_after_explosion_id, fade_multiplier_id, seconds_to_decelerate_id;
     
     GLuint vao, square_buffer, speed_buffer;
 
     FramebufferWrapper fbo;
-    TextureWrapper color_texture, depth_texture;
-    GLuint color_buffer;
+    TextureWrapper color_texture;
+//    TextureWrapper depth_texture;
+//    GLuint color_buffer;
     
     static constexpr float time_delta = 1.f / FPS;
     float time_after_explosion = 0.f;
@@ -47,12 +50,6 @@ private:
     const float seconds_to_decelerate = 3.5;
     const float fade_start_time_normalized = 0.2;
     const float fade_speed = 20;
-    
-    float get_fade_multiplier() const;
-    
-    float is_alive() const {
-        return get_fade_multiplier() > 0.01;
-    }
 };
 
 

@@ -10,7 +10,7 @@
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         : window_manager(window_manager)
-        , salutes_combiner_pass(width(), height(), "combine_simple.fsh")
+        , salutes_combiner_pass(width(), height())
         , passthrough_pass(width(), height())
         , sky_pass(width(), height(), "sky-night.bmp")
 {
@@ -34,21 +34,27 @@ void GLHolder::paint() {
         return;
     }
     
-//    if (glfwGetKey(window_manager->window(), GLFW_KEY_ENTER) == GLFW_PRESS) {
-//        for (auto &salute : salutes) {
-//            salute->reset();
-//        }
-//    }
+    if (glfwGetKey(window_manager->window(), GLFW_KEY_ENTER) == GLFW_PRESS) {
+        for (auto &salute : salutes) {
+            salute->reset();
+        }
+    }
     
 //    sky_pass.pass();
 //    passthrough_pass.set_input_texture(sky_pass.output_texture());
 //    passthrough_pass.pass();
     
     salutes_combiner_pass.reset();
-    for (auto &salute : salutes) {
-        salute->pass();
-        salutes_combiner_pass.set_input_texture(salute->output_texture());
-        salutes_combiner_pass.pass();
+    for (auto it = salutes.begin(); it != salutes.end(); ) {
+        auto &salute = *it;
+        if (!salute->is_alive()) {
+            it = salutes.erase(it);
+        } else {
+            salute->pass();
+            salutes_combiner_pass.set_input_texture(salute->output_texture());
+            salutes_combiner_pass.pass();
+            ++it;
+        }
     }
     
     passthrough_pass.set_input_texture(salutes_combiner_pass.output_texture());

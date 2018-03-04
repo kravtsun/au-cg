@@ -13,6 +13,8 @@ static std::shared_ptr<GLFWWindowManager> window_manager;
 static std::shared_ptr<GLHolder> gl_holder;
 
 static glm::dvec2 mouse_pos;
+static glm::dvec2 last_salute_pos;
+static clock_t last_salute_timestamp;
 
 static void glfw_mouse_pos_callback(GLFWwindow *, double xpos, double ypos) {
 //    if (!TwEventMousePosGLFW(static_cast<int>(xpos), static_cast<int>(ypos))) {
@@ -21,11 +23,18 @@ static void glfw_mouse_pos_callback(GLFWwindow *, double xpos, double ypos) {
     mouse_pos = glm::vec2(xpos, ypos);
 }
 
-static void glfw_mouse_button_callback(GLFWwindow *, int button, int action, int) {
-//    TwEventMouseButtonGLFW(button, action);
-    gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
+static inline double get_time_elapsed(clock_t time_delta) {
+    return static_cast<double>(time_delta) / CLOCKS_PER_SEC;
 }
 
+static void glfw_mouse_button_callback(GLFWwindow *, int button, int action, int) {
+//    TwEventMouseButtonGLFW(button, action);
+    if (get_time_elapsed(clock() - last_salute_timestamp) > 0.0001 || last_salute_pos != mouse_pos) {
+        gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
+        last_salute_timestamp = clock();
+        last_salute_pos = mouse_pos;
+    }
+}
 
 int main() {
     window_manager = std::make_shared<GLFWWindowManager>("Salute", 1024, 768);
@@ -46,9 +55,9 @@ int main() {
         gl_holder->paint();
 //        usleep(200*1e3);
         end = clock();
-        auto elapsed_secs = double(end - begin + ammortization_time) / CLOCKS_PER_SEC;
-        const double paint_time = double(end - begin) / CLOCKS_PER_SEC;
-        std::cout << paint_time * 1000 << "ms" << std::endl;
+        auto elapsed_secs = get_time_elapsed(end - begin + ammortization_time);
+        auto paint_time = get_time_elapsed(end - begin);
+//        std::cout << paint_time * 1000 << "ms" << std::endl;
 //        std::cout << cnt++ << std::endl;
         auto wait_time_in_secs = FRAME_TIME - elapsed_secs;
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;

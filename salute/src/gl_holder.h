@@ -2,10 +2,11 @@
 #define DEFERRED_GL_LOADER_H
 
 #include <memory>
-#include <vector>
+#include <list>
 #include <GL/glew.h>
 
 #include "SalutePass.h"
+#include "SaluteCombinerPass.h"
 #include "PassthroughPass.h"
 #include "SkyPass.h"
 
@@ -28,9 +29,9 @@ public:
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
     
-    std::vector<std::shared_ptr<SalutePass>> salutes;
+    std::list<std::shared_ptr<SalutePass>> salutes;
     
-    FrameCombinerPass salutes_combiner_pass;
+    SaluteCombinerPass salutes_combiner_pass;
     
     PassthroughPass passthrough_pass;
     

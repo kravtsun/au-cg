@@ -18,6 +18,10 @@ struct SalutePass : public AbstractPass {
         frame_combiner_pass.reset();
     }
     
+    bool is_alive() const {
+        return frame_pass.get_fade_multiplier() > 0.01;
+    }
+    
     ~SalutePass() final;
 
 private:
