@@ -10,16 +10,19 @@
 
 GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         : window_manager(window_manager)
-        , frame_pass(width(), height())
-        , frame_combiner_pass(width(), height())
+        , salutes_combiner_pass(width(), height(), "combine_simple.fsh")
         , passthrough_pass(width(), height())
         , sky_pass(width(), height(), "sky-night.bmp")
 {
     assert(glGetError() == GL_NO_ERROR);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width(), height());
-    glClearColor(0.1f, 0.0f, 0.0f, 0.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    add_salute(0, 0);
+}
+
+void GLHolder::add_salute(double x, double y, const glm::vec3 &color) {
+    x = (x / width() - 0.5) * 2 * FramePass::limit;
+    y = (0.5 - y / height()) * 2 * FramePass::limit;
+    const glm::vec3 position{x, y, 0};
+    salutes.push_back(std::make_shared<SalutePass>(width(), height(), position, color));
 }
 
 void GLHolder::paint() {
@@ -31,26 +34,35 @@ void GLHolder::paint() {
         return;
     }
     
-    if (glfwGetKey(window_manager->window(), GLFW_KEY_ENTER) == GLFW_PRESS) {
-        frame_pass.reset();
-        frame_combiner_pass.reset();
+//    if (glfwGetKey(window_manager->window(), GLFW_KEY_ENTER) == GLFW_PRESS) {
+//        for (auto &salute : salutes) {
+//            salute->reset();
+//        }
+//    }
+    
+//    sky_pass.pass();
+//    passthrough_pass.set_input_texture(sky_pass.output_texture());
+//    passthrough_pass.pass();
+    
+    salutes_combiner_pass.reset();
+    for (auto &salute : salutes) {
+        salute->pass();
+        salutes_combiner_pass.set_input_texture(salute->output_texture());
+        salutes_combiner_pass.pass();
     }
     
-    sky_pass.pass();
-    passthrough_pass.set_input_texture(sky_pass.output_texture());
+    passthrough_pass.set_input_texture(salutes_combiner_pass.output_texture());
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, width(), height());
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     passthrough_pass.pass();
-    
-//    frame_pass.pass();
-//    frame_combiner_pass.set_input_texture(frame_pass.output_texture());
-//    frame_combiner_pass.pass();
-//    passthrough_pass.set_input_texture(frame_combiner_pass.output_texture());
-//    passthrough_pass.pass();
     
     assert(glGetError() == GL_NO_ERROR);
 }
 
-GLHolder::~GLHolder() {
-}
+GLHolder::~GLHolder() = default;
 
 int GLHolder::width() const {
     return window_manager->win_width();

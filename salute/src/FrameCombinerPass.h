@@ -6,7 +6,7 @@
 struct FrameCombinerPass : public PassthroughPass {
     FrameCombinerPass(int width, int height, const std::string &fragment_path="combine.fsh");
 
-    GLuint output_texture() const override {
+    TextureWrapper output_texture() const override {
         return front_texture;
     }
     
@@ -17,11 +17,11 @@ struct FrameCombinerPass : public PassthroughPass {
     ~FrameCombinerPass() final;
     
 private:
-    GLuint program_id;
+    ProgramWrapper program;
     GLint input_texture_id, accumulator_texture_id;
     
-    GLuint fbo;
-    GLuint front_texture, back_texture;
+    FramebufferWrapper fbo;
+    TextureWrapper front_texture, back_texture;
 };
 
 

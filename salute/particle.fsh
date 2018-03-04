@@ -3,11 +3,11 @@
 //in vec2 UV;
 in vec2 fragment_coords; // coords inside a particle's circle (for fading effect).
 in vec3 particle_color;
-in float fade_multiplier;
 
 layout (location = 0) out vec4 color;
 
 //uniform sampler2D myTextureSampler;
+uniform float fade_multiplier;
 
 float sqr(in float x) {
     return x * x;

@@ -1,21 +1,44 @@
+#include <iostream>
 #include <memory>
+#include <unistd.h>
+
 #include "glfw_window_manager.h"
 #include "gl_holder.h"
-#include <unistd.h>
-#include <iostream>
+#include <GLFW/glfw3.h>
 
 static const double FPS = 60.0;
 static const double FRAME_TIME = 1.0 / FPS;
 
+static std::shared_ptr<GLFWWindowManager> window_manager;
+static std::shared_ptr<GLHolder> gl_holder;
+
+static glm::dvec2 mouse_pos;
+
+static void glfw_mouse_pos_callback(GLFWwindow *, double xpos, double ypos) {
+//    if (!TwEventMousePosGLFW(static_cast<int>(xpos), static_cast<int>(ypos))) {
+//        const glm::dvec2 cur_pos{xpos, ypos};
+//    }
+    mouse_pos = glm::vec2(xpos, ypos);
+}
+
+static void glfw_mouse_button_callback(GLFWwindow *, int button, int action, int) {
+//    TwEventMouseButtonGLFW(button, action);
+    gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
+}
+
+
 int main() {
-    auto window_manager = std::make_shared<GLFWWindowManager>("Salute", 1024, 768);
-    auto gl_holder = std::make_shared<GLHolder>(window_manager);
+    window_manager = std::make_shared<GLFWWindowManager>("Salute", 1024, 768);
+    gl_holder = std::make_shared<GLHolder>(window_manager);
 
     clock_t ammortization_time = 0;
     
     clock_t begin = 0, end = 0;
     
-    int cnt = 0;
+//    int cnt = 0;
+    
+    glfwSetMouseButtonCallback(window_manager->window(), glfw_mouse_button_callback);
+    glfwSetCursorPosCallback(window_manager->window(), glfw_mouse_pos_callback);
     
     window_manager->main_loop([&]() {
         ammortization_time = end - begin;

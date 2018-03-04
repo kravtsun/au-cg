@@ -1,12 +1,12 @@
 #ifndef DEFERRED_GL_LOADER_H
 #define DEFERRED_GL_LOADER_H
 
-#include <GL/glew.h>
 #include <memory>
+#include <vector>
+#include <GL/glew.h>
 
-#include "FramePass.h"
+#include "SalutePass.h"
 #include "PassthroughPass.h"
-#include "FrameCombinerPass.h"
 #include "SkyPass.h"
 
 struct GLFWWindowManager;
@@ -19,6 +19,8 @@ public:
     
     int height() const;
     
+    void add_salute(double x, double y, const glm::vec3 &color=glm::vec3(1, 1, 1));
+    
     virtual void paint();
     
     virtual ~GLHolder();
@@ -26,9 +28,11 @@ public:
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
     
-    FramePass frame_pass;
+    std::vector<std::shared_ptr<SalutePass>> salutes;
+    
+    FrameCombinerPass salutes_combiner_pass;
+    
     PassthroughPass passthrough_pass;
-    FrameCombinerPass frame_combiner_pass;
     
     SkyPass sky_pass;
 };

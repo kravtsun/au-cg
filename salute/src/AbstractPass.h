@@ -1,7 +1,17 @@
 #ifndef SALUTE_PASSCOMMON_H
 #define SALUTE_PASSCOMMON_H
 
+#include <memory>
 #include <GL/glew.h>
+
+struct Program;
+using ProgramWrapper = std::shared_ptr<Program>;
+
+struct Framebuffer;
+using FramebufferWrapper = std::shared_ptr<Framebuffer>;
+
+struct Texture;
+using TextureWrapper = std::shared_ptr<Texture>;
 
 struct AbstractPass {
     AbstractPass(int width, int height);
@@ -12,16 +22,16 @@ struct AbstractPass {
     
     virtual void pass() = 0;
     
-    virtual GLuint output_texture() const = 0;
+    virtual TextureWrapper output_texture() const = 0;
     
-    virtual ~AbstractPass();
+    virtual ~AbstractPass() noexcept;
 
 protected:
     // helpers for inheritors.
     // TODO make a base class for passes rendering into a separate framebuffer with (one?) output texture
-    static void init_and_bind_empty_texture(GLuint &texture, int width, int height);
+    static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
     
-    void init_framebuffer_with_output_texture(GLuint &fbo, GLuint &color_texture);
+    void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture);
     
 private:
     const int width, height;

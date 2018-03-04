@@ -1,6 +1,7 @@
 #ifndef SALUTE_PASSTHROUGHPASS_H
 #define SALUTE_PASSTHROUGHPASS_H
 
+#include <string>
 #include "AbstractPass.h"
 
 struct PassthroughPass: public AbstractPass {
@@ -15,18 +16,18 @@ struct PassthroughPass: public AbstractPass {
     
     void pass() override;
     
-    void set_input_texture(GLuint new_input_texture) {
+    void set_input_texture(TextureWrapper new_input_texture) {
         input_texture = new_input_texture;
     }
     
-    GLuint output_texture() const override;
+    TextureWrapper output_texture() const override;
     
     virtual ~PassthroughPass();
 
 protected:
     void draw_quad() const;
     
-    GLuint get_input_texture() const {
+    TextureWrapper get_input_texture() const {
         return input_texture;
     }
     
@@ -34,10 +35,11 @@ protected:
 
 private:
     bool is_direct;
-    GLuint program_id;
+    ProgramWrapper program;
     GLint pass_texture_id;
-    GLuint input_texture = static_cast<GLuint>(-1);
+    TextureWrapper input_texture;
     
+    GLuint quad_vao;
     GLuint quad_vertexbuffer;
 };
 

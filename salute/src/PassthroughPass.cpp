@@ -1,7 +1,8 @@
 #include <cassert>
 #include <stdexcept>
 #include "PassthroughPass.h"
-#include "shader.h"
+
+#include "wrappers/AllWrappers.h"
 
 static const GLfloat quadz = 1.0f;
 static const GLfloat g_quad_vertex_buffer_data[] = {
@@ -13,16 +14,19 @@ static const GLfloat g_quad_vertex_buffer_data[] = {
         1.0f, 1.0f, quadz,
 };
 
-PassthroughPass::PassthroughPass(const int width, const int height, bool direct)
+PassthroughPass::PassthroughPass(int width, int height, bool direct)
     : AbstractPass(width, height)
     , is_direct(direct)
 {
     if (is_direct) {
-        program_id = load_shaders("pass_texture.vsh", "pass_texture.fsh");
-        pass_texture_id = glGetUniformLocation(program_id, "input_texture");
+        program = std::make_shared<Program>("pass_texture.vsh", "pass_texture.fsh");
+        pass_texture_id = glGetUniformLocation(*program, "input_texture");
     }
     
     // TODO a separate vertex array object?
+    
+    glGenVertexArrays(1, &quad_vao);
+    glBindVertexArray(quad_vao);
     
     glGenBuffers(1, &quad_vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
@@ -31,30 +35,25 @@ PassthroughPass::PassthroughPass(const int width, const int height, bool direct)
 
 void PassthroughPass::pass() {
     check_input_texture_set();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
-    glUseProgram(program_id);
+    program->use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, input_texture);
+    get_input_texture()->bind();
     glUniform1i(pass_texture_id, 0);
-
-//    glEnable(GL_BLEND);
-//    glBlendFunc(GL_ONE, GL_ONE);
+    
     draw_quad();
 }
 
 PassthroughPass::~PassthroughPass() {
     glDeleteBuffers(1, &quad_vertexbuffer);
-    if (!is_direct) {
-        glDeleteProgram(program_id);
-    }
+    glDeleteVertexArrays(1, &quad_vao);
 }
 
-GLuint PassthroughPass::output_texture() const {
+TextureWrapper PassthroughPass::output_texture() const {
     throw std::logic_error("PassthroughPass is supposed to send output to the default framebuffer only");
 }
 
 void PassthroughPass::draw_quad() const {
+    glBindVertexArray(quad_vao);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
     glVertexAttribPointer(
@@ -71,7 +70,7 @@ void PassthroughPass::draw_quad() const {
 }
 
 void PassthroughPass::check_input_texture_set(const std::string &caller) const {
-    if (get_input_texture() == static_cast<GLuint>(-1)) {
+    if (get_input_texture() == nullptr) {
         throw std::logic_error("Error in " + caller + ": Input texture not set.");
     }
 }

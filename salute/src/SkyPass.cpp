@@ -1,31 +1,30 @@
 #include <string>
-#include <cstdio>
 #include <stdexcept>
 #include <cassert>
 
 #include "SkyPass.h"
-#include "shader.h"
+#include "wrappers/AllWrappers.h"
 
 SkyPass::SkyPass(int width, int height, const std::string &filename)
         : PassthroughPass(width, height, false)
+        , program_id(new Program("pass_texture.vsh", "sky.fsh"))
 {
-    program_id = load_shaders("pass_texture.vsh", "sky.fsh");
-    bias_id = glGetUniformLocation(program_id, "bias");
-    input_texture_id = glGetUniformLocation(program_id, "input_texture");
+    bias_id = glGetUniformLocation(*program_id, "bias");
+    input_texture_id = glGetUniformLocation(*program_id, "input_texture");
     input_texture = load_bmp_texture(filename);
     init_framebuffer_with_output_texture(fbo, color_texture);
 }
 
-GLuint SkyPass::load_bmp_texture(const std::string &filename) {
-    // Data read from the header of the BMP file
-    char header[54]; // Each BMP file begins by a 54-bytes header
+TextureWrapper SkyPass::load_bmp_texture(const std::string &filename) {
+    constexpr size_t HEADER_SIZE = 54;
+    char header[HEADER_SIZE];
     
     FILE *file = fopen(filename.c_str(), "rb");
     if (!file){
         throw std::logic_error("Failed to open image from file: " + filename);
     }
     
-    if (fread(header, 1, 54, file) != 54 || header[0] != 'B' || header[1] != 'M') {
+    if (fread(header, 1, HEADER_SIZE, file) != HEADER_SIZE || header[0] != 'B' || header[1] != 'M') {
         throw std::logic_error("Bad BMP: " + filename);
     }
     
@@ -47,9 +46,7 @@ GLuint SkyPass::load_bmp_texture(const std::string &filename) {
     fread(data, 1, static_cast<size_t>(image_size), file);
     fclose(file);
     
-    GLuint texture;
-    glGenTextures(1, &texture);
-
+    TextureWrapper texture;
     init_and_bind_empty_texture(texture, width, height);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
     
@@ -57,15 +54,11 @@ GLuint SkyPass::load_bmp_texture(const std::string &filename) {
     return texture;
 }
 
-SkyPass::~SkyPass() {
-    glDeleteTextures(1, &input_texture);
-    glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &color_texture);
-}
+SkyPass::~SkyPass() = default;
 
 void SkyPass::pass() {
-    glUseProgram(program_id);
-    glUniform1i(input_texture_id, input_texture);
+    program_id->use();
+    glUniform1i(input_texture_id, *input_texture);
     glUniform2f(bias_id, step.x, step.y);
     step.x += 1. / get_width();
     
@@ -73,9 +66,9 @@ void SkyPass::pass() {
         step.x -= 1;
     }
     
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    fbo->bind();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, input_texture);
+    input_texture->bind();
     glUniform1i(input_texture_id, 0);
     
     glViewport(0, 0, get_width(), get_height());

@@ -1,5 +1,6 @@
 #include <cassert>
 #include "AbstractPass.h"
+#include "wrappers/AllWrappers.h"
 
 AbstractPass::AbstractPass(int width, int height)
         : width(width)
@@ -8,9 +9,9 @@ AbstractPass::AbstractPass(int width, int height)
 
 AbstractPass::~AbstractPass() = default;
 
-void AbstractPass::init_and_bind_empty_texture(GLuint &texture, int width, int height) {
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+void AbstractPass::init_and_bind_empty_texture(TextureWrapper &texture, int width, int height) {
+    texture = std::make_shared<Texture>();
+    texture->bind();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
     
     // Poor filtering
@@ -20,12 +21,12 @@ void AbstractPass::init_and_bind_empty_texture(GLuint &texture, int width, int h
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void AbstractPass::init_framebuffer_with_output_texture(GLuint &fbo, GLuint &color_texture) {
+void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) {
     init_and_bind_empty_texture(color_texture, get_width(), get_height());
     
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_texture, 0);
+    fbo = std::make_shared<Framebuffer>();
+    fbo->bind();
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *color_texture, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
 //    glBindTexture(GL_TEXTURE_2D, depth_texture);

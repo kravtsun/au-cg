@@ -2,14 +2,14 @@
 #include <algorithm>
 #include <stdexcept>
 #include "FrameCombinerPass.h"
-#include "shader.h"
+#include "wrappers/AllWrappers.h"
 
 FrameCombinerPass::FrameCombinerPass(int width, int height, const std::string &fragment_path)
         : PassthroughPass(width, height, false)
+        , program(new Program("pass_texture.vsh", fragment_path.c_str()))
 {
-    program_id = load_shaders("pass_texture.vsh", fragment_path.c_str());
-    input_texture_id = glGetUniformLocation(program_id, "input_texture");
-    accumulator_texture_id = glGetUniformLocation(program_id, "output_texture");
+    input_texture_id = glGetUniformLocation(*program, "input_texture");
+    accumulator_texture_id = glGetUniformLocation(*program, "output_texture");
     
     init_framebuffer_with_output_texture(fbo, front_texture);
     glClearColor(0, 0, 0, 0);
@@ -22,43 +22,28 @@ FrameCombinerPass::FrameCombinerPass(int width, int height, const std::string &f
 void FrameCombinerPass::pass() {
     check_input_texture_set("FrameCombinerPass");
     
-    glUseProgram(program_id);
+    program->use();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, front_texture);
+    front_texture->bind();
     glUniform1i(accumulator_texture_id, 0);
     
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, get_input_texture());
+    get_input_texture()->bind();
     glUniform1i(input_texture_id, 1);
     
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, back_texture, 0);
-    const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
-    
+    fbo->bind();
     glViewport(0, 0, get_width(), get_height());
-    glClear(GL_COLOR_BUFFER_BIT);
+    back_texture->reset();
     glDisable(GL_BLEND); // done in shader.
 
     draw_quad();
     std::swap(front_texture, back_texture);
 }
 
-FrameCombinerPass::~FrameCombinerPass() {
-    glDeleteFramebuffers(1, &fbo);
-    glDeleteTextures(1, &front_texture);
-    glDeleteTextures(1, &back_texture);
-    glDeleteProgram(program_id);
-}
+FrameCombinerPass::~FrameCombinerPass() = default;
 
 void FrameCombinerPass::reset() {
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    auto reset_texture = [&](const GLuint &texture) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-        const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-        assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
-        glClear(GL_COLOR_BUFFER_BIT);
-    };
-    reset_texture(front_texture);
-    reset_texture(back_texture);
+    fbo->bind();
+    front_texture->reset();
+    back_texture->reset();
 }
