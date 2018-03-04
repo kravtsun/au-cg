@@ -20,7 +20,7 @@ public:
     
     int height() const;
     
-    void add_salute(double x, double y, const glm::vec3 &color=glm::vec3(1, 1, 1));
+    void add_salute(double x, double y);
     
     virtual void paint();
     

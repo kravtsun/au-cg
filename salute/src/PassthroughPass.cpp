@@ -32,12 +32,16 @@ PassthroughPass::PassthroughPass(int width, int height, bool direct)
 }
 
 void PassthroughPass::pass() {
-    check_input_texture_set();
+    check_input_texture_set("PassthroughPass");
     program->use();
     glActiveTexture(GL_TEXTURE0);
     get_input_texture()->bind();
     glUniform1i(pass_texture_id, 0);
     draw_quad();
+}
+
+void PassthroughPass::set_input_texture(TextureWrapper new_input_texture) {
+    input_texture = new_input_texture;
 }
 
 PassthroughPass::~PassthroughPass() {
@@ -64,6 +68,10 @@ void PassthroughPass::draw_quad() const {
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisableVertexAttribArray(0);
+}
+
+TextureWrapper PassthroughPass::get_input_texture() const {
+    return input_texture;
 }
 
 void PassthroughPass::check_input_texture_set(const std::string &caller) const {

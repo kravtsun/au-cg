@@ -10,9 +10,7 @@ struct SkyPass : public PassthroughPass {
     
     void pass() override;
     
-    TextureWrapper output_texture() const override {
-        return color_texture;
-    }
+    TextureWrapper output_texture() const override;
     
     ~SkyPass() final;
     

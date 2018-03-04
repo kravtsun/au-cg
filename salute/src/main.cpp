@@ -6,7 +6,7 @@
 #include "gl_holder.h"
 #include <GLFW/glfw3.h>
 
-#define PERFORMANCE_TEST 0
+#define PERFORMANCE_TEST 1
 
 static const double FPS = 60.0;
 static const double FRAME_TIME = 1.0 / FPS;
@@ -32,11 +32,7 @@ static inline double get_time_elapsed(clock_t time_delta) {
 static void glfw_mouse_button_callback(GLFWwindow *, int button, int action, int) {
 //    TwEventMouseButtonGLFW(button, action);
     if (get_time_elapsed(clock() - last_salute_timestamp) > 0.05 || last_salute_pos != mouse_pos) {
-        glm::vec3 color{1, 1, 1};
-//        for (int i = 0; i < 3; ++i) {
-//            color[i] = (float) rand() / RAND_MAX;
-//        }
-        gl_holder->add_salute(mouse_pos.x, mouse_pos.y, color);
+        gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
         last_salute_timestamp = clock();
         last_salute_pos = mouse_pos;
     }
@@ -47,7 +43,6 @@ int main() {
     gl_holder = std::make_shared<GLHolder>(window_manager);
 
     clock_t ammortization_time = 0;
-    
     clock_t begin = 0, end = 0;
     
     glfwSetMouseButtonCallback(window_manager->window(), glfw_mouse_button_callback);
@@ -65,7 +60,6 @@ int main() {
         }
 #endif
         gl_holder->paint();
-//        usleep(200*1e3);
         end = clock();
         auto elapsed_secs = get_time_elapsed(end - begin + ammortization_time);
         auto paint_time = get_time_elapsed(end - begin);
@@ -73,7 +67,9 @@ int main() {
         auto wait_time_in_secs = FRAME_TIME - elapsed_secs;
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;
         if (wait_time_in_usecs >= 1) {
+#if __linux__
             usleep(static_cast<__useconds_t>(wait_time_in_usecs));
+#endif
         }
         // TODO move delay to paint procedure.
         end = clock();

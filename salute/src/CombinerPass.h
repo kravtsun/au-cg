@@ -6,9 +6,7 @@
 struct CombinerPass : public PassthroughPass {
     CombinerPass(int width, int height);
 
-    TextureWrapper output_texture() const override {
-        return front_texture;
-    }
+    TextureWrapper output_texture() const override;
     
     void reset();
     

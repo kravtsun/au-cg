@@ -16,9 +16,7 @@ struct PassthroughPass: public AbstractPass {
     
     void pass() override;
     
-    void set_input_texture(TextureWrapper new_input_texture) {
-        input_texture = new_input_texture;
-    }
+    void set_input_texture(TextureWrapper new_input_texture);
     
     TextureWrapper output_texture() const override;
     
@@ -27,11 +25,9 @@ struct PassthroughPass: public AbstractPass {
 protected:
     void draw_quad() const;
     
-    TextureWrapper get_input_texture() const {
-        return input_texture;
-    }
+    TextureWrapper get_input_texture() const;
     
-    void check_input_texture_set(const std::string &caller="PassthroughPass") const;
+    void check_input_texture_set(const std::string &caller) const;
 
 private:
     bool is_direct;

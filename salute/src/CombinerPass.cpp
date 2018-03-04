@@ -1,6 +1,3 @@
-#include <cassert>
-#include <algorithm>
-#include <stdexcept>
 #include "CombinerPass.h"
 #include "wrappers/AllWrappers.h"
 
@@ -16,6 +13,10 @@ CombinerPass::CombinerPass(int width, int height)
 }
 
 CombinerPass::~CombinerPass() = default;
+
+TextureWrapper CombinerPass::output_texture() const {
+    return front_texture;
+}
 
 void CombinerPass::reset() {
     fbo->bind();

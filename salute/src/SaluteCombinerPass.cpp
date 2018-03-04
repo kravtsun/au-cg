@@ -19,7 +19,6 @@ void SaluteCombinerPass::pass() {
     check_input_texture_set("SaluteCombinerPass");
     
     get_program()->use();
-    
     glActiveTexture(GL_TEXTURE0);
     get_input_texture()->bind();
     const GLint input_texture_id = glGetUniformLocation(*get_program(), "input_texture");

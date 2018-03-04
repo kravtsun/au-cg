@@ -1,16 +1,17 @@
 #ifndef SALUTE_FRAMEPASS_H
 #define SALUTE_FRAMEPASS_H
 
-#include "AbstractPass.h"
-#include <glm/vec3.hpp>
+#include <vector>
 #include <cstdio>
+#include <glm/vec3.hpp>
+#include "AbstractPass.h"
 
 struct FramePass : public AbstractPass {
-    // TODO explosion parameters:
-    // - nparticles (convert to vector?).
     FramePass(int width, int height,
               const glm::vec3 &particle_start=glm::vec3(0, 0, 0),
-              const glm::vec3 &particle_color=glm::vec3(1, 1, 1));
+              const glm::vec3 &particle_color=glm::vec3(1, 1, 1),
+              int nparticles=100,
+              float speed_magnitude=30);
 
     void pass() override;
 
@@ -37,12 +38,13 @@ private:
     static GLint particle_start_id, particle_color_id, particle_size_id,
             time_after_explosion_id, fade_multiplier_id, seconds_to_decelerate_id;
     
+    std::vector<glm::vec3> speed;
+    int nparticles;
+    
     GLuint vao, square_buffer, speed_buffer;
-
+    
     FramebufferWrapper fbo;
     TextureWrapper color_texture;
-//    TextureWrapper depth_texture;
-//    GLuint color_buffer;
     
     static constexpr float time_delta = 1.f / FPS;
     float time_after_explosion = 0.f;

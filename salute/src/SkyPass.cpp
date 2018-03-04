@@ -75,3 +75,7 @@ void SkyPass::pass() {
     glClear(GL_COLOR_BUFFER_BIT);
     draw_quad();
 }
+
+TextureWrapper SkyPass::output_texture() const {
+    return color_texture;
+}

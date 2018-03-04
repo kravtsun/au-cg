@@ -28,7 +28,6 @@ struct AbstractPass {
 
 protected:
     // helpers for inheritors.
-    // TODO make a base class for passes rendering into a separate framebuffer with (one?) output texture
     static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
     
     void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture);

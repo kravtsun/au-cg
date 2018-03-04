@@ -12,16 +12,23 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         : window_manager(window_manager)
         , salutes_combiner_pass(width(), height())
         , passthrough_pass(width(), height())
-        , sky_pass(width(), height(), "sky-night.bmp")
+        , sky_pass(width(), height(), "black_clouds.bmp")
 {
     assert(glGetError() == GL_NO_ERROR);
+    add_salute(width() / 2., height() / 2.);
 }
 
-void GLHolder::add_salute(double x, double y, const glm::vec3 &color) {
+void GLHolder::add_salute(double x, double y) {
     x = (x / width() - 0.5) * 2 * FramePass::limit;
     y = (0.5 - y / height()) * 2 * FramePass::limit;
     const glm::vec3 position{x, y, 0};
-    salutes.push_back(std::make_shared<SalutePass>(width(), height(), position, color));
+    glm::vec3 color{1, 1, 1};
+    for (int i = 0; i < 3; ++i) {
+        color[i] = (float) rand() / RAND_MAX;
+    }
+    const int nparticles = (rand() % 10 + 1) * 100;
+    const float speed_magnitude = (rand() % 10 + 1) * 5.f;
+    salutes.push_back(std::make_shared<SalutePass>(width(), height(), position, color, nparticles, speed_magnitude));
 }
 
 void GLHolder::paint() {

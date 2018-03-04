@@ -7,20 +7,18 @@
 #include "FrameCombinerPass.h"
 
 struct SalutePass : public AbstractPass {
-    SalutePass(int width, int height, glm::vec3 position, const glm::vec3 &color);
+    SalutePass(int width, int height,
+               const glm::vec3 &position, const glm::vec3 &color,
+               int nparticles=100,
+               float speed_magnitude=30);
     
     void pass() override;
     
     TextureWrapper output_texture() const override;
     
-    void reset() {
-        frame_pass.reset();
-        frame_combiner_pass.reset();
-    }
+    void reset();
     
-    bool is_alive() const {
-        return frame_pass.get_fade_multiplier() > 0.01;
-    }
+    bool is_alive() const;
     
     ~SalutePass() final;
 

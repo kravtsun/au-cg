@@ -11,12 +11,6 @@ static const vec3 direction{0, 0, -1};
 static const vec3 up{0, 1, 0};
 static const vec3 right{1, 0, 0};
 
-static const float SPEED_MAGNITUDE = 30.f;
-
-static const int NPARTICLES = 300;
-
-static vec3 speed[NPARTICLES];
-
 template<typename T=double>
 static inline T rand_range(T a, T b) {
     assert(b > a);
@@ -44,10 +38,13 @@ GLint FramePass::particle_start_id, FramePass::particle_color_id, FramePass::par
 
 FramePass::FramePass(int width, int height,
                      const glm::vec3 &particle_start,
-                     const glm::vec3 &particle_color)
+                     const glm::vec3 &particle_color,
+                     int nparticles,
+                     float speed_magnitude)
     : AbstractPass(width, height)
     , particle_start(particle_start)
     , particle_color(particle_color)
+    , nparticles(nparticles)
 {
     if (program == nullptr) {
         program.reset(new Program("particle.vsh", "particle.fsh"));
@@ -65,11 +62,13 @@ FramePass::FramePass(int width, int height,
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     
-    for (int i = 0; i < NPARTICLES; ++i) {
+    speed.resize(nparticles);
+    
+    for (int i = 0; i < nparticles; ++i) {
         for (int j = 0; j < 3; ++j) {
             speed[i][j] = rand_range<float>(-1.f, 1.f);
         }
-        speed[i] = glm::normalize(speed[i]) * SPEED_MAGNITUDE;
+        speed[i] = glm::normalize(speed[i]) * speed_magnitude;
     }
     
     glGenBuffers(1, &square_buffer);
@@ -79,7 +78,7 @@ FramePass::FramePass(int width, int height,
     glGenBuffers(1, &speed_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, speed_buffer);
     static_assert(sizeof(vec3) == 3 * 4, "");
-    glBufferData(GL_ARRAY_BUFFER, sizeof(speed), speed, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, speed.size() * sizeof(speed[0]), &speed[0], GL_STATIC_DRAW);
     
     init_framebuffer_with_output_texture(fbo, color_texture);
 }
@@ -94,8 +93,6 @@ float FramePass::get_fade_multiplier() const {
 }
 
 void FramePass::pass() {
-// Projection matrix : 45 Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-//    auto projection = glm::perspective(glm::radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
     const float zNear = 0.1f, zFar = 100.f;
     const float xLeft = -limit, xRight = limit;
     const float yBottom = -limit, yTop = limit;
@@ -116,15 +113,13 @@ void FramePass::pass() {
     glUniform1f(seconds_to_decelerate_id, seconds_to_decelerate);
     glUniform1f(fade_multiplier_id, get_fade_multiplier());
     time_after_explosion += time_delta;
-
-//    computeMatricesFromInputs(window_manager->window());
+    
     fbo->bind();
-    glViewport(0, 0, get_width(), get_height());
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    color_texture->reset();
+    
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_BLEND);
-    glBlendFunc (GL_SRC_ALPHA, GL_ZERO);
-//    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
     
     glBindVertexArray(vao);
     glEnableVertexAttribArray(0);
@@ -138,8 +133,7 @@ void FramePass::pass() {
     glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
     glVertexAttribDivisor(1, 1); // one per quad advance.
     
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, NPARTICLES);
-//    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nparticles);
     
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
@@ -156,6 +150,5 @@ void FramePass::reset() {
     glViewport(0, 0, get_width(), get_height());
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    
     time_after_explosion = 0;
 }

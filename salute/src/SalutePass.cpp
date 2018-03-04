@@ -1,11 +1,16 @@
 #include "SalutePass.h"
 
-SalutePass::SalutePass(int width, int height, glm::vec3 position, const glm::vec3 &color)
+SalutePass::SalutePass(int width, int height,
+                       const glm::vec3 &position, const glm::vec3 &color,
+                       int nparticles,
+                       float speed_magnitude)
         : AbstractPass(width, height)
-        , frame_pass(width, height, position, color)
+        , frame_pass(width, height, position, color, nparticles, speed_magnitude)
         , frame_combiner_pass(width, height)
-{
-}
+{}
+
+SalutePass::~SalutePass() = default;
+
 
 void SalutePass::pass() {
     frame_pass.pass();
@@ -17,4 +22,12 @@ TextureWrapper SalutePass::output_texture() const {
     return frame_combiner_pass.output_texture();
 }
 
-SalutePass::~SalutePass() = default;
+void SalutePass::reset() {
+    frame_pass.reset();
+    frame_combiner_pass.reset();
+}
+
+bool SalutePass::is_alive() const {
+    return frame_pass.get_fade_multiplier() > 0.01;
+}
+
