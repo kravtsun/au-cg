@@ -7,6 +7,7 @@
 #include "FramePass.h"
 #include "PassthroughPass.h"
 #include "FrameCombinerPass.h"
+#include "SkyPass.h"
 
 struct GLFWWindowManager;
 
@@ -28,6 +29,8 @@ private:
     FramePass frame_pass;
     PassthroughPass passthrough_pass;
     FrameCombinerPass frame_combiner_pass;
+    
+    SkyPass sky_pass;
 };
 
 

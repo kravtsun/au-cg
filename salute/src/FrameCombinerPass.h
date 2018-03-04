@@ -4,7 +4,7 @@
 #include "PassthroughPass.h"
 
 struct FrameCombinerPass : public PassthroughPass {
-    FrameCombinerPass(int width, int height);
+    FrameCombinerPass(int width, int height, const std::string &fragment_path="combine.fsh");
 
     GLuint output_texture() const override {
         return front_texture;

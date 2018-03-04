@@ -4,10 +4,10 @@
 #include "FrameCombinerPass.h"
 #include "shader.h"
 
-FrameCombinerPass::FrameCombinerPass(const int width, const int height)
+FrameCombinerPass::FrameCombinerPass(int width, int height, const std::string &fragment_path)
         : PassthroughPass(width, height, false)
 {
-    program_id = load_shaders("pass_texture.vsh", "combine.fsh");
+    program_id = load_shaders("pass_texture.vsh", fragment_path.c_str());
     input_texture_id = glGetUniformLocation(program_id, "input_texture");
     accumulator_texture_id = glGetUniformLocation(program_id, "output_texture");
     
@@ -15,7 +15,7 @@ FrameCombinerPass::FrameCombinerPass(const int width, const int height)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
     
-    init_and_bind_output_texture(back_texture);
+    init_and_bind_empty_texture(back_texture, get_width(), get_height());
 //    std::swap(front_texture, back_texture);
 }
 

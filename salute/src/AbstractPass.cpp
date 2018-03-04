@@ -1,24 +1,27 @@
 #include <cassert>
 #include "AbstractPass.h"
 
-AbstractPass::~AbstractPass() {
+AbstractPass::AbstractPass(int width, int height)
+        : width(width)
+        , height(height)
+{}
 
-}
+AbstractPass::~AbstractPass() = default;
 
-void AbstractPass::init_and_bind_output_texture(GLuint &texture) {
+void AbstractPass::init_and_bind_empty_texture(GLuint &texture, int width, int height) {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, get_width(), get_height(), 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
     
     // Poor filtering
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void AbstractPass::init_framebuffer_with_output_texture(GLuint &fbo, GLuint &color_texture) {
-    init_and_bind_output_texture(color_texture);
+    init_and_bind_empty_texture(color_texture, get_width(), get_height());
     
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);

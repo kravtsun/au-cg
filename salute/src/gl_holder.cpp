@@ -13,6 +13,7 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         , frame_pass(width(), height())
         , frame_combiner_pass(width(), height())
         , passthrough_pass(width(), height())
+        , sky_pass(width(), height(), "sky-night.bmp")
 {
     assert(glGetError() == GL_NO_ERROR);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -22,11 +23,11 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
 }
 
 void GLHolder::paint() {
-    static bool isPaused = false;
+    static bool is_paused = false;
     if (glfwGetKey(window_manager->window(), GLFW_KEY_SPACE) == GLFW_PRESS) {
-        isPaused = !isPaused;
+        is_paused = !is_paused;
     }
-    if (isPaused) {
+    if (is_paused) {
         return;
     }
     
@@ -35,11 +36,15 @@ void GLHolder::paint() {
         frame_combiner_pass.reset();
     }
     
-    frame_pass.pass();
-    frame_combiner_pass.set_input_texture(frame_pass.output_texture());
-    frame_combiner_pass.pass();
-    passthrough_pass.set_input_texture(frame_combiner_pass.output_texture());
+    sky_pass.pass();
+    passthrough_pass.set_input_texture(sky_pass.output_texture());
     passthrough_pass.pass();
+    
+//    frame_pass.pass();
+//    frame_combiner_pass.set_input_texture(frame_pass.output_texture());
+//    frame_combiner_pass.pass();
+//    passthrough_pass.set_input_texture(frame_combiner_pass.output_texture());
+//    passthrough_pass.pass();
     
     assert(glGetError() == GL_NO_ERROR);
 }

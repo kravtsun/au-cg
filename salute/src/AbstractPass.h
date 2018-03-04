@@ -4,10 +4,7 @@
 #include <GL/glew.h>
 
 struct AbstractPass {
-    AbstractPass(const int width, const int height)
-            : width(width)
-            , height(height)
-    {}
+    AbstractPass(int width, int height);
     
     int get_width() const { return width; }
     
@@ -17,13 +14,12 @@ struct AbstractPass {
     
     virtual GLuint output_texture() const = 0;
     
-    
     virtual ~AbstractPass();
 
 protected:
     // helpers for inheritors.
     // TODO make a base class for passes rendering into a separate framebuffer with (one?) output texture
-    void init_and_bind_output_texture(GLuint &texture);
+    static void init_and_bind_empty_texture(GLuint &texture, int width, int height);
     
     void init_framebuffer_with_output_texture(GLuint &fbo, GLuint &color_texture);
     
