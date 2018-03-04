@@ -15,7 +15,6 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         , sky_pass(width(), height(), "sky-night.bmp")
 {
     assert(glGetError() == GL_NO_ERROR);
-//    add_salute(0, 0);
 }
 
 void GLHolder::add_salute(double x, double y, const glm::vec3 &color) {
@@ -39,12 +38,11 @@ void GLHolder::paint() {
             salute->reset();
         }
     }
-    
-//    sky_pass.pass();
-//    passthrough_pass.set_input_texture(sky_pass.output_texture());
-//    passthrough_pass.pass();
-    
+
+    sky_pass.pass();
     salutes_combiner_pass.reset();
+    salutes_combiner_pass.set_input_texture(sky_pass.output_texture());
+    salutes_combiner_pass.pass();
     for (auto it = salutes.begin(); it != salutes.end(); ) {
         auto &salute = *it;
         if (!salute->is_alive()) {
@@ -56,15 +54,13 @@ void GLHolder::paint() {
             ++it;
         }
     }
-    
     passthrough_pass.set_input_texture(salutes_combiner_pass.output_texture());
-
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(0, 0, width(), height());
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     passthrough_pass.pass();
-    
     assert(glGetError() == GL_NO_ERROR);
 }
 

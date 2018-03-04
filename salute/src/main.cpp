@@ -6,6 +6,8 @@
 #include "gl_holder.h"
 #include <GLFW/glfw3.h>
 
+#define PERFORMANCE_TEST 0
+
 static const double FPS = 60.0;
 static const double FRAME_TIME = 1.0 / FPS;
 
@@ -29,8 +31,12 @@ static inline double get_time_elapsed(clock_t time_delta) {
 
 static void glfw_mouse_button_callback(GLFWwindow *, int button, int action, int) {
 //    TwEventMouseButtonGLFW(button, action);
-    if (get_time_elapsed(clock() - last_salute_timestamp) > 0.0001 || last_salute_pos != mouse_pos) {
-        gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
+    if (get_time_elapsed(clock() - last_salute_timestamp) > 0.05 || last_salute_pos != mouse_pos) {
+        glm::vec3 color{1, 1, 1};
+//        for (int i = 0; i < 3; ++i) {
+//            color[i] = (float) rand() / RAND_MAX;
+//        }
+        gl_holder->add_salute(mouse_pos.x, mouse_pos.y, color);
         last_salute_timestamp = clock();
         last_salute_pos = mouse_pos;
     }
@@ -44,21 +50,26 @@ int main() {
     
     clock_t begin = 0, end = 0;
     
-//    int cnt = 0;
-    
     glfwSetMouseButtonCallback(window_manager->window(), glfw_mouse_button_callback);
     glfwSetCursorPosCallback(window_manager->window(), glfw_mouse_pos_callback);
-    
+
+#if PERFORMANCE_TEST
+    int cnt = 0;
+#endif
     window_manager->main_loop([&]() {
         ammortization_time = end - begin;
         begin = clock();
+#if PERFORMANCE_TEST
+        if (cnt % 5 == 0) {
+            gl_holder->add_salute(rand() % 1024, rand() % 768);
+        }
+#endif
         gl_holder->paint();
 //        usleep(200*1e3);
         end = clock();
         auto elapsed_secs = get_time_elapsed(end - begin + ammortization_time);
         auto paint_time = get_time_elapsed(end - begin);
 //        std::cout << paint_time * 1000 << "ms" << std::endl;
-//        std::cout << cnt++ << std::endl;
         auto wait_time_in_secs = FRAME_TIME - elapsed_secs;
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;
         if (wait_time_in_usecs >= 1) {
@@ -66,6 +77,12 @@ int main() {
         }
         // TODO move delay to paint procedure.
         end = clock();
+#if PERFORMANCE_TEST
+        cnt++;
+        if (cnt == 300) {
+            exit(0);
+        }
+#endif
     });
     return 0;
 }

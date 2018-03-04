@@ -13,7 +13,7 @@ static const vec3 right{1, 0, 0};
 
 static const float SPEED_MAGNITUDE = 30.f;
 
-static const int NPARTICLES = 1000;
+static const int NPARTICLES = 300;
 
 static vec3 speed[NPARTICLES];
 

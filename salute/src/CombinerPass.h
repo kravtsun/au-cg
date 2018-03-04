@@ -10,15 +10,13 @@ struct CombinerPass : public PassthroughPass {
         return front_texture;
     }
     
-    void pass() override;
-    
     void reset();
     
     virtual const ProgramWrapper &get_program() const = 0;
     
     virtual ~CombinerPass();
     
-private:
+protected:
     FramebufferWrapper fbo;
     TextureWrapper front_texture, back_texture;
 };

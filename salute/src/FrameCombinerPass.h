@@ -7,6 +7,8 @@ struct FrameCombinerPass : public CombinerPass {
     FrameCombinerPass(int width, int height);
     
     const ProgramWrapper &get_program() const override;
+    
+    void pass() override;
 
 private:
     static ProgramWrapper program;

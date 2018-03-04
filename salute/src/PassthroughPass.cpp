@@ -23,8 +23,6 @@ PassthroughPass::PassthroughPass(int width, int height, bool direct)
         pass_texture_id = glGetUniformLocation(*program, "input_texture");
     }
     
-    // TODO a separate vertex array object?
-    
     glGenVertexArrays(1, &quad_vao);
     glBindVertexArray(quad_vao);
     
@@ -39,7 +37,6 @@ void PassthroughPass::pass() {
     glActiveTexture(GL_TEXTURE0);
     get_input_texture()->bind();
     glUniform1i(pass_texture_id, 0);
-    
     draw_quad();
 }
 

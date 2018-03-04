@@ -7,6 +7,8 @@ struct SaluteCombinerPass : public CombinerPass {
     SaluteCombinerPass(int width, int height);
     
     const ProgramWrapper &get_program() const override;
+    
+    void pass() override;
 
 private:
     static ProgramWrapper program;
