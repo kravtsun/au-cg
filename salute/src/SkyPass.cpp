@@ -1,3 +1,7 @@
+
+#if _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <string>
 #include <stdexcept>
 #include <cassert>
@@ -32,9 +36,9 @@ TextureWrapper SkyPass::load_bmp_texture(const std::string &filename) {
 //    if (dataPos == 0) {
 //        dataPos = 54;
 //    }
-    auto image_size = *reinterpret_cast<const int *>(&(header[0x22]));
-    auto const width = *reinterpret_cast<const int *>(&(header[0x12]));
-    auto const height = *reinterpret_cast<const int *>(&(header[0x16]));
+    auto image_size = *reinterpret_cast<const int *>(&header[0x22]);
+    auto const width = *reinterpret_cast<const int *>(&header[0x12]);
+    auto const height = *reinterpret_cast<const int *>(&header[0x16]);
     
     if (image_size == 0) {
         image_size = width * height * 3;
@@ -60,7 +64,7 @@ void SkyPass::pass() {
     program_id->use();
     glUniform1i(input_texture_id, *input_texture);
     glUniform2f(bias_id, step.x, step.y);
-    step.x += 1. / get_width();
+    step.x += 0.25f / get_width();
     
     if (step.x > 1) {
         step.x -= 1;

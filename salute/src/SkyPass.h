@@ -5,7 +5,7 @@
 #include <glm/vec2.hpp>
 #include "PassthroughPass.h"
 
-struct SkyPass : public PassthroughPass {
+struct SkyPass : PassthroughPass {
     SkyPass(int width, int height, const std::string &filename);
     
     void pass() override;
@@ -23,7 +23,6 @@ private:
     
     glm::vec2 step;
 
-private:
     static TextureWrapper load_bmp_texture(const std::string &filename);
 };
 

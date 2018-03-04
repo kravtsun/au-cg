@@ -3,7 +3,7 @@
 
 #include "CombinerPass.h"
 
-struct SaluteCombinerPass : public CombinerPass {
+struct SaluteCombinerPass : CombinerPass {
     SaluteCombinerPass(int width, int height);
     
     const ProgramWrapper &get_program() const override;

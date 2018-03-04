@@ -2,9 +2,10 @@
 #define SALUTE_PASSTHROUGHPASS_H
 
 #include <string>
+#include <GL/glew.h>
 #include "AbstractPass.h"
 
-struct PassthroughPass: public AbstractPass {
+struct PassthroughPass: AbstractPass {
     /**
      * @param width
      * @param height

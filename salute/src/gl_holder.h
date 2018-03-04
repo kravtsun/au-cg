@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <list>
-#include <GL/glew.h>
 
 #include "SalutePass.h"
 #include "SaluteCombinerPass.h"
@@ -12,8 +11,7 @@
 
 struct GLFWWindowManager;
 
-class GLHolder {
-public:
+struct GLHolder {
     explicit GLHolder(std::shared_ptr<GLFWWindowManager> window_manager);
     
     int width() const;
@@ -37,6 +35,5 @@ private:
     
     SkyPass sky_pass;
 };
-
 
 #endif //DEFERRED_GL_LOADER_H

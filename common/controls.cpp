@@ -2,6 +2,10 @@
 #include "glfw_window_manager.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#ifndef M_PI
+#define M_PI 3.14159265359
+#endif
+
 using namespace glm;
 
 static glm::mat4 ViewMatrix;

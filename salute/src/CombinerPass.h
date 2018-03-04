@@ -3,12 +3,12 @@
 
 #include "PassthroughPass.h"
 
-struct CombinerPass : public PassthroughPass {
+struct CombinerPass : PassthroughPass {
     CombinerPass(int width, int height);
 
     TextureWrapper output_texture() const override;
     
-    void reset();
+    void reset() const;
     
     virtual const ProgramWrapper &get_program() const = 0;
     

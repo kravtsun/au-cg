@@ -15,7 +15,6 @@ GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
         , sky_pass(width(), height(), "black_clouds.bmp")
 {
     assert(glGetError() == GL_NO_ERROR);
-    add_salute(width() / 2., height() / 2.);
 }
 
 void GLHolder::add_salute(double x, double y) {
@@ -24,10 +23,10 @@ void GLHolder::add_salute(double x, double y) {
     const glm::vec3 position{x, y, 0};
     glm::vec3 color{1, 1, 1};
     for (int i = 0; i < 3; ++i) {
-        color[i] = (float) rand() / RAND_MAX;
+        color[i] = static_cast<float>(rand()) / RAND_MAX;
     }
     const int nparticles = (rand() % 10 + 1) * 100;
-    const float speed_magnitude = (rand() % 10 + 1) * 5.f;
+    const float speed_magnitude = (rand() % 10 + 3) * 5.f;
     salutes.push_back(std::make_shared<SalutePass>(width(), height(), position, color, nparticles, speed_magnitude));
 }
 
@@ -80,4 +79,3 @@ int GLHolder::width() const {
 int GLHolder::height() const {
     return window_manager->win_height();
 }
-

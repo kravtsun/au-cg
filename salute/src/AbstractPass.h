@@ -2,7 +2,6 @@
 #define SALUTE_PASSCOMMON_H
 
 #include <memory>
-#include <GL/glew.h>
 
 struct Program;
 using ProgramWrapper = std::shared_ptr<Program>;
@@ -30,7 +29,7 @@ protected:
     // helpers for inheritors.
     static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
     
-    void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture);
+    void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) const;
     
 private:
     const int width, height;

@@ -2,11 +2,11 @@
 #define SALUTE_FRAMEPASS_H
 
 #include <vector>
-#include <cstdio>
 #include <glm/vec3.hpp>
+#include <GL/glew.h>
 #include "AbstractPass.h"
 
-struct FramePass : public AbstractPass {
+struct FramePass : AbstractPass {
     FramePass(int width, int height,
               const glm::vec3 &particle_start=glm::vec3(0, 0, 0),
               const glm::vec3 &particle_color=glm::vec3(1, 1, 1),
@@ -49,8 +49,8 @@ private:
     static constexpr float time_delta = 1.f / FPS;
     float time_after_explosion = 0.f;
     
-    const float seconds_to_decelerate = 3.5;
-    const float fade_start_time_normalized = 0.2;
+    const float seconds_to_decelerate = 3.5f;
+    const float fade_start_time_normalized = 0.2f;
     const float fade_speed = 20;
 };
 

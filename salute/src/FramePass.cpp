@@ -12,7 +12,7 @@ static const vec3 up{0, 1, 0};
 static const vec3 right{1, 0, 0};
 
 template<typename T=double>
-static inline T rand_range(T a, T b) {
+static T rand_range(T a, T b) {
     assert(b > a);
     return a + static_cast<T>(rand()) / RAND_MAX * (b - a);
 }
@@ -108,7 +108,7 @@ void FramePass::pass() {
     
     PASS_UNIFORM_3F(particle_start_id, particle_start);
     PASS_UNIFORM_3F(particle_color_id, particle_color);
-    glUniform1f(particle_size_id, 0.6);
+    glUniform1f(particle_size_id, 0.6f);
     glUniform1f(time_after_explosion_id, time_after_explosion);
     glUniform1f(seconds_to_decelerate_id, seconds_to_decelerate);
     glUniform1f(fade_multiplier_id, get_fade_multiplier());

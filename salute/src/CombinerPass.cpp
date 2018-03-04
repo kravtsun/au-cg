@@ -18,7 +18,7 @@ TextureWrapper CombinerPass::output_texture() const {
     return front_texture;
 }
 
-void CombinerPass::reset() {
+void CombinerPass::reset() const {
     fbo->bind();
     back_texture->reset();
     front_texture->reset();

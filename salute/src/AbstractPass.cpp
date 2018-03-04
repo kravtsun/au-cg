@@ -1,4 +1,4 @@
-#include <cassert>
+#include <stdexcept>
 #include "AbstractPass.h"
 #include "wrappers/AllWrappers.h"
 
@@ -20,7 +20,7 @@ void AbstractPass::init_and_bind_empty_texture(TextureWrapper &texture, int widt
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) {
+void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) const {
     init_and_bind_empty_texture(color_texture, get_width(), get_height());
     
     fbo = std::make_shared<Framebuffer>();
@@ -32,6 +32,9 @@ void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo,
     const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, draw_buffers);
     
+
     const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    assert(fbo_status == GL_FRAMEBUFFER_COMPLETE);
+    if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {
+        throw std::logic_error("Failed to complete framebuffer");
+    }
 }

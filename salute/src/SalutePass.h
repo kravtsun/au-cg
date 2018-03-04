@@ -6,7 +6,7 @@
 #include "FramePass.h"
 #include "FrameCombinerPass.h"
 
-struct SalutePass : public AbstractPass {
+struct SalutePass : AbstractPass {
     SalutePass(int width, int height,
                const glm::vec3 &position, const glm::vec3 &color,
                int nparticles=100,
