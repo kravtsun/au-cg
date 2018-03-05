@@ -1,4 +1,3 @@
-// Borrowed from https://github.com/opengl-tutorials/ogl referenced by http://www.opengl-tutorial.org
 #include <cassert>
 #include <string>
 #include <vector>

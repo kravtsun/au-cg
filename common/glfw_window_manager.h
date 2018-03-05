@@ -6,9 +6,7 @@
 
 struct GLFWwindow;
 
-class GLFWWindowManager
-{
-public:
+struct GLFWWindowManager {
 	GLFWWindowManager(const std::string &win_name, int win_width, int win_height);
 
 	virtual ~GLFWWindowManager();
