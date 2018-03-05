@@ -24,10 +24,13 @@ file(GLOB COMMON_FILES
     ../common/glfw_window_manager.*
 )
 
+file(GLOB WRAPPER_FILES
+    ../common/wrappers/*.h
+    ../common/wrappers/*.cpp
+)
+
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
-AUX_SOURCE_DIRECTORY(src/wrappers WRAPPER_FILES)
-set(WRAPPER_FILES ${WRAPPER_FILES} src/wrappers/AllWrappers.h)
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES} src/wrappers/VertexArray.cpp src/wrappers/VertexArray.h src/wrappers/VertexBuffer.cpp src/wrappers/VertexBuffer.h)
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES})
 
 add_executable(salute
     ../3rdparty/glm
