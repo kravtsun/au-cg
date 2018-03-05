@@ -41,7 +41,8 @@ private:
     std::vector<glm::vec3> speed;
     int nparticles;
     
-    GLuint vao, square_buffer, speed_buffer;
+    VertexArrayWrapper vao;
+    VertexBufferWrapper square_buffer, speed_buffer;
     
     FramebufferWrapper fbo;
     TextureWrapper color_texture;

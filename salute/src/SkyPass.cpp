@@ -62,7 +62,7 @@ SkyPass::~SkyPass() = default;
 
 void SkyPass::pass() {
     program_id->use();
-    glUniform1i(input_texture_id, *input_texture);
+    input_texture->bind_as_input(input_texture_id);
     glUniform2f(bias_id, step.x, step.y);
     step.x += 0.25f / get_width();
     
@@ -71,10 +71,7 @@ void SkyPass::pass() {
     }
     
     fbo->bind();
-    glActiveTexture(GL_TEXTURE0);
-    input_texture->bind();
-    glUniform1i(input_texture_id, 0);
-    
+    input_texture->bind_as_input(input_texture_id, 0);
     glViewport(0, 0, get_width(), get_height());
     glClear(GL_COLOR_BUFFER_BIT);
     draw_quad();

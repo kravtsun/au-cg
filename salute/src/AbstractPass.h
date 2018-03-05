@@ -12,6 +12,12 @@ using FramebufferWrapper = std::shared_ptr<Framebuffer>;
 struct Texture;
 using TextureWrapper = std::shared_ptr<Texture>;
 
+struct VertexArray;
+using VertexArrayWrapper = std::shared_ptr<VertexArray>;
+
+struct VertexBuffer;
+using VertexBufferWrapper = std::shared_ptr<VertexBuffer>;
+
 struct AbstractPass {
     AbstractPass(int width, int height);
     

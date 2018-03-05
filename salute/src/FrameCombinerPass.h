@@ -14,5 +14,4 @@ private:
     static ProgramWrapper program;
 };
 
-
 #endif //SALUTE_FRAMECOMBINERPASS_H

@@ -17,26 +17,22 @@ static const GLfloat g_quad_vertex_buffer_data[] = {
 PassthroughPass::PassthroughPass(int width, int height, bool direct)
     : AbstractPass(width, height)
     , is_direct(direct)
+    , quad_vao(new VertexArray())
+    , quad_vertexbuffer(new VertexBuffer())
 {
     if (is_direct) {
         program = std::make_shared<Program>("pass_texture.vsh", "pass_texture.fsh");
         pass_texture_id = glGetUniformLocation(*program, "input_texture");
     }
     
-    glGenVertexArrays(1, &quad_vao);
-    glBindVertexArray(quad_vao);
-    
-    glGenBuffers(1, &quad_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_quad_vertex_buffer_data), g_quad_vertex_buffer_data, GL_STATIC_DRAW);
+    quad_vao->bind();
+    quad_vertexbuffer->data(g_quad_vertex_buffer_data, sizeof(g_quad_vertex_buffer_data));
 }
 
 void PassthroughPass::pass() {
     check_input_texture_set("PassthroughPass");
     program->use();
-    glActiveTexture(GL_TEXTURE0);
-    get_input_texture()->bind();
-    glUniform1i(pass_texture_id, 0);
+    get_input_texture()->bind_as_input(pass_texture_id, 0);
     draw_quad();
 }
 
@@ -44,30 +40,17 @@ void PassthroughPass::set_input_texture(TextureWrapper new_input_texture) {
     input_texture = new_input_texture;
 }
 
-PassthroughPass::~PassthroughPass() {
-    glDeleteBuffers(1, &quad_vertexbuffer);
-    glDeleteVertexArrays(1, &quad_vao);
-}
+PassthroughPass::~PassthroughPass() = default;
 
 TextureWrapper PassthroughPass::output_texture() const {
     throw std::logic_error("PassthroughPass is supposed to send output to the default framebuffer only");
 }
 
 void PassthroughPass::draw_quad() const {
-    glBindVertexArray(quad_vao);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-    glVertexAttribPointer(
-            0,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            0,
-            nullptr
-    );
-    
+    quad_vao->bind();
+    quad_vertexbuffer->bind_vertex_attrib(0, 3);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glDisableVertexAttribArray(0);
+    quad_vertexbuffer->unbind_vertex_attrib();
 }
 
 TextureWrapper PassthroughPass::get_input_texture() const {

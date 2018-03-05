@@ -12,6 +12,8 @@ struct Texture final {
     
     void bind(GLenum target=GL_TEXTURE_2D) const;
     
+    void bind_as_input(GLint uniform_id, GLuint texture_unit_id=0, GLenum target=GL_TEXTURE_2D);
+    
     void reset() const;
 private:
     GLuint texture;

@@ -45,6 +45,9 @@ FramePass::FramePass(int width, int height,
     , particle_start(particle_start)
     , particle_color(particle_color)
     , nparticles(nparticles)
+    , vao(new VertexArray())
+    , square_buffer(new VertexBuffer())
+    , speed_buffer(new VertexBuffer())
 {
     if (program == nullptr) {
         program.reset(new Program("particle.vsh", "particle.fsh"));
@@ -59,9 +62,6 @@ FramePass::FramePass(int width, int height,
         seconds_to_decelerate_id = glGetUniformLocation(*program, "seconds_to_decelerate");
     }
     
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    
     speed.resize(nparticles);
     
     for (int i = 0; i < nparticles; ++i) {
@@ -71,15 +71,10 @@ FramePass::FramePass(int width, int height,
         speed[i] = glm::normalize(speed[i]) * speed_magnitude;
     }
     
-    glGenBuffers(1, &square_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, square_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data), g_vertex_buffer_data, GL_STATIC_DRAW);
-    
-    glGenBuffers(1, &speed_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, speed_buffer);
+    vao->bind();
+    square_buffer->data(g_vertex_buffer_data, sizeof(g_vertex_buffer_data));
     static_assert(sizeof(vec3) == 3 * 4, "");
-    glBufferData(GL_ARRAY_BUFFER, speed.size() * sizeof(speed[0]), &speed[0], GL_STATIC_DRAW);
-    
+    speed_buffer->data(&speed[0], speed.size() * sizeof(speed[0]));
     init_framebuffer_with_output_texture(fbo, color_texture);
 }
 
@@ -121,29 +116,20 @@ void FramePass::pass() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ZERO);
     
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, square_buffer);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, speed_buffer);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    vao->bind();
+    square_buffer->bind_vertex_attrib(0, 3);
+    speed_buffer->bind_vertex_attrib(1, 3);
     
     glVertexAttribDivisor(0, 0); // particles vertices : always reuse the same 4 vertices -> 0
     glVertexAttribDivisor(1, 1); // one per quad advance.
     
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, nparticles);
-    
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
+
+    square_buffer->unbind_vertex_attrib();
+    speed_buffer->unbind_vertex_attrib();
 }
 
-FramePass::~FramePass() {
-    glDeleteBuffers(1, &speed_buffer);
-    glDeleteBuffers(1, &square_buffer);
-    glDeleteVertexArrays(1, &vao);
-}
+FramePass::~FramePass() = default;
 
 void FramePass::reset() {
     fbo->bind();

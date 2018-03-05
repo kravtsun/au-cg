@@ -7,7 +7,6 @@ CombinerPass::CombinerPass(int width, int height)
     init_framebuffer_with_output_texture(fbo, front_texture);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    
     init_and_bind_empty_texture(back_texture, get_width(), get_height());
 //    std::swap(front_texture, back_texture);
 }

@@ -11,7 +11,7 @@ AbstractPass::~AbstractPass() = default;
 
 void AbstractPass::init_and_bind_empty_texture(TextureWrapper &texture, int width, int height) {
     texture = std::make_shared<Texture>();
-    texture->bind();
+    texture->bind(GL_TEXTURE_2D);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -31,7 +31,6 @@ void AbstractPass::init_framebuffer_with_output_texture(FramebufferWrapper &fbo,
 
     const GLenum draw_buffers[] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, draw_buffers);
-    
 
     const GLenum fbo_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (fbo_status != GL_FRAMEBUFFER_COMPLETE) {

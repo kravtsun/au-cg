@@ -36,8 +36,8 @@ private:
     GLint pass_texture_id;
     TextureWrapper input_texture;
     
-    GLuint quad_vao;
-    GLuint quad_vertexbuffer;
+    VertexArrayWrapper quad_vao;
+    VertexBufferWrapper quad_vertexbuffer;
 };
 
 
