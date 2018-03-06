@@ -16,3 +16,7 @@ Program::operator GLuint() const {
 void Program::use() const {
     glUseProgram(program_id);
 }
+
+GLint Program::location(const char *name) const {
+    return glGetUniformLocation(program_id, name);
+}

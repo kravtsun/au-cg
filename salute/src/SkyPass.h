@@ -22,8 +22,6 @@ private:
     FramebufferWrapper fbo;
     
     glm::vec2 step;
-
-    static TextureWrapper load_bmp_texture(const std::string &filename);
 };
 
 

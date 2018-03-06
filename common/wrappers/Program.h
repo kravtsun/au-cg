@@ -10,6 +10,8 @@ struct Program final {
     
     void use() const;
     
+    GLint location(const char *name) const;
+    
     ~Program();
 
 private:

@@ -10,8 +10,6 @@ set(CMAKE_CXX_STANDARD 11)
 find_package(GLEW REQUIRED)
 find_package(glfw3 3.1.2 REQUIRED)
 
-EXECUTE_PROCESS(COMMAND pwd)
-
 add_custom_command(
     OUTPUT ../3rdparty/glm
     COMMAND unzip glm-0.9.8.5.zip
@@ -22,6 +20,8 @@ add_custom_command(
 file(GLOB COMMON_FILES
     ../common/shader.*
     ../common/glfw_window_manager.*
+    ../common/AbstractPass.*
+    ../common/PassthroughPass.*
 )
 
 file(GLOB WRAPPER_FILES

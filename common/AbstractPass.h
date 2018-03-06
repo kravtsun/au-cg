@@ -2,6 +2,7 @@
 #define SALUTE_PASSCOMMON_H
 
 #include <memory>
+#include <string>
 
 struct Program;
 using ProgramWrapper = std::shared_ptr<Program>;
@@ -36,6 +37,10 @@ protected:
     static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
     
     void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) const;
+
+    static unsigned char *load_bmp(const std::string &filename, int &width, int &height);
+    
+    static TextureWrapper load_bmp_texture(const std::string &filename);
     
 private:
     const int width, height;
