@@ -4,32 +4,46 @@
 #include <vector>
 #include <string>
 
+#include <glm/vec2.hpp>
+
 #include "AbstractPass.h"
 #include "PassthroughPass.h"
 
-struct CellPass : PassthroughPass {
+struct CellPass {
     // speed, display position, lines, symbol_width, symbol_height,
-    CellPass(int win_width, int win_height);
+    CellPass(const glm::ivec2 &roi_pos, const glm::ivec2 &roi_size, const std::vector<std::string> &lines);
 
-    TextureWrapper output_texture() const override {
+    static TextureWrapper output_texture() {
         return color_texture;
     }
     
-    void pass() override;
+    void set_yspeed(GLfloat new_yspeed) {
+        yspeed = new_yspeed;
+    }
+    
+    static void prepare_passthrough(int win_width, int win_height);
+    
+    static void prepare_pass();
+    
+    void pass();
     
 private:
-    std::vector<std::string> lines;
-//    std::vector<std::vector<TextureWrapper>> textures;
     TextureWrapper texture;
     
-    ProgramWrapper program;
-    GLint pass_texture_id;
+    static ProgramWrapper program;
+    static GLint pass_texture_id;
+    static GLint ymin_id, ymax_id;
     
-    GLint ymin_id, ymax_id;
-    GLfloat ymin = 0.f, ysize = 0.333333f;
+    const std::vector<std::string> lines;
+    const GLfloat ysize;
+    GLfloat ymin = 0.f;
+    GLfloat yspeed = 0.f;
     
-    FramebufferWrapper fbo;
-    TextureWrapper color_texture;
+    glm::ivec2 roi_pos, roi_size;
+    
+    static std::shared_ptr<PassthroughPass> passthrough_pass;
+    static FramebufferWrapper fbo;
+    static TextureWrapper color_texture;
 };
 
 

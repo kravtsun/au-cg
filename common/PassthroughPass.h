@@ -23,9 +23,9 @@ struct PassthroughPass: AbstractPass {
     
     virtual ~PassthroughPass();
 
-protected:
     void draw_quad() const;
-    
+
+protected:
     TextureWrapper get_input_texture() const;
     
     void check_input_texture_set(const std::string &caller) const;

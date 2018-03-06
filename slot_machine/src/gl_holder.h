@@ -22,7 +22,7 @@ struct GLHolder {
 
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
-    CellPass cell_pass;
+    std::vector<CellPass> cell_passes;
     PassthroughPass passthrough_pass;
 };
 

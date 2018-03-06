@@ -32,8 +32,6 @@ struct AbstractPass {
     
     virtual ~AbstractPass() noexcept;
 
-protected:
-    // helpers for inheritors.
     static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
     
     void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) const;
