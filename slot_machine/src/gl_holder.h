@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 
 #include "PassthroughPass.h"
-#include "CellPass.h"
+#include "CellsPass.h"
 
 struct GLFWWindowManager;
 
@@ -22,7 +22,7 @@ struct GLHolder {
 
 private:
     std::shared_ptr<GLFWWindowManager> window_manager;
-    std::vector<CellPass> cell_passes;
+    CellsPass cells_pass;
     PassthroughPass passthrough_pass;
 };
 

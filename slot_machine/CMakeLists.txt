@@ -26,7 +26,7 @@ file(GLOB WRAPPER_FILES
 )
 
 AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES} src/gl_holder.cpp src/gl_holder.h src/CellPass.cpp src/CellPass.h)
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES})
 
 add_executable(slot_machine
         ../3rdparty/glm

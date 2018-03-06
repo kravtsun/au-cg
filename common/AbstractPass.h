@@ -19,6 +19,8 @@ using VertexArrayWrapper = std::shared_ptr<VertexArray>;
 struct VertexBuffer;
 using VertexBufferWrapper = std::shared_ptr<VertexBuffer>;
 
+typedef unsigned char uchar;
+
 struct AbstractPass {
     AbstractPass(int width, int height);
     
