@@ -1,9 +1,9 @@
 #include <cassert>
 
 #include "gl_holder.h"
-#include "glfw_window_manager.h"
+#include "window_manager.h"
 
-GLHolder::GLHolder(std::shared_ptr<GLFWWindowManager> window_manager)
+GLHolder::GLHolder(std::shared_ptr<WindowManager> window_manager)
         : window_manager(window_manager)
         , passthrough_pass(width(), height())
         , cells_pass(width(), height())

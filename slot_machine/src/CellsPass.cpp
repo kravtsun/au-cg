@@ -1,6 +1,7 @@
 #include <map>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include "CellsPass.h"
 #include "wrappers/AllWrappers.h"

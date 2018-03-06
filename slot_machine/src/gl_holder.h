@@ -7,10 +7,10 @@
 #include "PassthroughPass.h"
 #include "CellsPass.h"
 
-struct GLFWWindowManager;
+struct WindowManager;
 
 struct GLHolder {
-    explicit GLHolder(std::shared_ptr<GLFWWindowManager> window_manager);
+    explicit GLHolder(std::shared_ptr<WindowManager> window_manager);
     
     int width() const;
     
@@ -21,7 +21,7 @@ struct GLHolder {
     virtual ~GLHolder();
 
 private:
-    std::shared_ptr<GLFWWindowManager> window_manager;
+    std::shared_ptr<WindowManager> window_manager;
     CellsPass cells_pass;
     PassthroughPass passthrough_pass;
 };

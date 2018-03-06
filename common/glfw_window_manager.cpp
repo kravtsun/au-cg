@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include "glfw_window_manager.h"
 
 volatile int gl_error;
@@ -12,8 +13,24 @@ static void init_glew() {
     gl_error = glGetError(); // can give gl_error != GL_NO_ERROR after glewInit.
 }
 
-GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_width, const int win_height) :
-        win_name_(win_name), win_width_(win_width), win_height_(win_height) {
+static glm::vec2 mouse_pos;
+
+static void glfw_mouse_pos_callback(GLFWwindow *, double xpos, double ypos) {
+    mouse_pos = glm::vec2(xpos, ypos);
+}
+
+static void glfw_mouse_button_callback(GLFWwindow *, int, int, int) {
+//    if (get_time_elapsed(clock() - last_salute_timestamp) > 0.5 || last_salute_pos != mouse_pos) {
+//        std::cout << "Adding salute" << std::endl;
+//        gl_holder->add_salute(mouse_pos.x, mouse_pos.y);
+//        last_salute_timestamp = clock();
+//        last_salute_pos = mouse_pos;
+//    }
+}
+
+GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_width, const int win_height)
+                                : WindowManager(win_name, win_width, win_height)
+{
     if (win_width * win_height == 0) {
         throw std::logic_error("Window is empty");
     }
@@ -43,6 +60,9 @@ GLFWWindowManager::GLFWWindowManager(const std::string &win_name, const int win_
     glfwPollEvents();
     
     init_glew();
+    
+    glfwSetMouseButtonCallback(window_, glfw_mouse_button_callback);
+    glfwSetCursorPosCallback(window_, glfw_mouse_pos_callback);
 }
 
 void GLFWWindowManager::main_loop(std::function<void()> inside_action) const {
@@ -55,8 +75,8 @@ void GLFWWindowManager::main_loop(std::function<void()> inside_action) const {
 }
 
 void GLFWWindowManager::resize(int new_width, int new_height) {
-    win_width_ = new_width;
-    win_height_ = new_height;
+    WindowManager::resize(new_width, new_height);
+    glfwSetWindowSize(window_, new_width, new_height);
 }
 
 GLFWWindowManager::~GLFWWindowManager() {
