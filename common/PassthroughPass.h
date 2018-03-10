@@ -34,6 +34,7 @@ private:
     bool is_direct;
     ProgramWrapper program;
     GLint pass_texture_id;
+    
     TextureWrapper input_texture;
     
     VertexArrayWrapper quad_vao;

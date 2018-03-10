@@ -3,24 +3,25 @@
 
 #include "PassthroughPass.h"
 #include "CellHolder.h"
+#include "color/ColorSupplier.h"
 
 struct CellsPass : PassthroughPass {
     CellsPass(int width, int height);
     
     void pass() override;
     
-    TextureWrapper output_texture() const override {
-        return color_texture;
-    }
+    void set_fgcolor(const ColorSupplierWrapper &new_fgcolor);
+    
+    void set_bgcolor(const ColorSupplierWrapper &new_bgcolor);
     
     ~CellsPass() final = default;
-
-private:
-    ProgramWrapper program;
-    std::vector<CellHolder> cell_holders;
     
-    FramebufferWrapper fbo;
-    TextureWrapper color_texture;
+private:
+    std::vector<CellHolder> cell_holders;
+    ProgramWrapper program;
+    GLint pass_texture_id, ymin_id, ymax_id, bgcolor_id, fgcolor_id;
+    ColorSupplierWrapper fgcolor;
+    ColorSupplierWrapper bgcolor;
 };
 
 

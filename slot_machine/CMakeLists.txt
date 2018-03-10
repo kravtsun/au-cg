@@ -29,8 +29,21 @@ file(GLOB WRAPPER_FILES
         ../common/wrappers/*.cpp
 )
 
-AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES} ../common/window_manager.h ../common/window_manager.cpp ../common/glut_window_manager.cpp ../common/glut_window_manager.h)
+#AUX_SOURCE_DIRECTORY(src/ SOURCE_FILES)
+set(SOURCE_FILES
+        src/main.cpp
+        src/gl_holder.h src/gl_holder.cpp
+        src/color/ColorSupplier.h
+        src/color/BlinkColor.h src/color/BlinkColor.cpp
+        src/color/ConstantColor.h src/color/ConstantColor.cpp
+        src/Button.h src/Button.cpp
+        src/StartButton.h src/StartButton.cpp
+        src/StartButtonPass.h src/StartButtonPass.cpp
+        src/CellsPass.h src/CellsPass.cpp
+        src/CellHolder.h src/CellHolder.cpp
+)
+
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES} src/StartButton.cpp src/StartButton.h src/color/BlinkColor.cpp src/color/BlinkColor.h src/color/ColorSupplier.h src/color/ConstantColor.cpp src/color/ConstantColor.h src/resources.h)
 
 add_executable(slot_machine
         ../3rdparty/glm

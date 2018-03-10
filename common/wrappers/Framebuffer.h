@@ -2,6 +2,7 @@
 #define SALUTE_FRAMEBUFFER_H
 
 #include <GL/glew.h>
+#include "Texture.h"
 
 struct Framebuffer final {
     Framebuffer();
@@ -11,6 +12,8 @@ struct Framebuffer final {
     operator GLuint() const;
     
     void bind(GLenum target=GL_FRAMEBUFFER) const;
+    
+    void bind_output_texture(Texture &texture) const;
 
 private:
     GLuint fbo;

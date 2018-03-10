@@ -6,6 +6,7 @@
 
 #include "PassthroughPass.h"
 #include "CellsPass.h"
+#include "StartButtonPass.h"
 
 struct WindowManager;
 
@@ -23,6 +24,7 @@ struct GLHolder {
 private:
     std::shared_ptr<WindowManager> window_manager;
     CellsPass cells_pass;
+    StartButtonPass start_button_pass;
     PassthroughPass passthrough_pass;
 };
 

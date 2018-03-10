@@ -1,23 +1,9 @@
 #ifndef SALUTE_PASSCOMMON_H
 #define SALUTE_PASSCOMMON_H
 
-#include <memory>
 #include <string>
 
-struct Program;
-using ProgramWrapper = std::shared_ptr<Program>;
-
-struct Framebuffer;
-using FramebufferWrapper = std::shared_ptr<Framebuffer>;
-
-struct Texture;
-using TextureWrapper = std::shared_ptr<Texture>;
-
-struct VertexArray;
-using VertexArrayWrapper = std::shared_ptr<VertexArray>;
-
-struct VertexBuffer;
-using VertexBufferWrapper = std::shared_ptr<VertexBuffer>;
+#include "wrappers/AllWrappersFwd.h"
 
 typedef unsigned char uchar;
 
@@ -33,21 +19,22 @@ struct AbstractPass {
     virtual TextureWrapper output_texture() const = 0;
     
     virtual ~AbstractPass() noexcept;
-
-    static void init_and_bind_empty_texture(TextureWrapper &texture, int width, int height);
-    
-    void init_framebuffer_with_output_texture(FramebufferWrapper &fbo, TextureWrapper &color_texture) const;
-
-    static unsigned char *load_bmp(const std::string &filename, int &width, int &height);
-    
-    static TextureWrapper load_bmp_texture(const std::string &filename);
-    
 private:
     const int width, height;
 };
 
-#define PASS_UNIFORM_3F(id, value) \
-    glUniform3f(id, (value).x, (value).y, (value).z);
+#define PASS_UNIFORM_3F(id, value)                     \
+    do {                                               \
+        auto value_ = (value);                         \
+        glUniform3f(id, value_.x, value_.y, value_.z); \
+    } while (false);
+
+#define PASS_UNIFORM_4F(id, value)      \
+    do {                                \
+        auto value_ = (value);          \
+        glUniform4fv(id, 1, &value_[0]); \
+    } while (false);
+
 
 #define PASS_UNIFORM_MAT4(id, value)                                \
     do {                                                            \

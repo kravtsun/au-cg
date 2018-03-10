@@ -6,36 +6,43 @@
 #include <string>
 
 #include <glm/vec2.hpp>
-
 #include "AbstractPass.h"
-#include "PassthroughPass.h"
+#include "Button.h"
 
-struct CellHolder {
+struct CellHolder: Button {
     static constexpr size_t CELL_COUNT = 3;
     static constexpr size_t SYMBOL_TEXTURE_WIDTH = 300;
     static constexpr size_t SYMBOL_TEXTURE_HEIGHT = 300;
     
-    // speed, display position, lines, symbol_width, symbol_height,
     CellHolder(const glm::ivec2 &roi_pos,
                const glm::ivec2 &roi_size,
                const std::vector<std::string> &lines,
                const std::map<char, uchar *> &textures_data);
 
-    void pass(const ProgramWrapper &program);
+    void prepare() override;
     
-    void set_yspeed(GLfloat new_yspeed) {
+    void set_yspeed(double new_yspeed) {
         yspeed = new_yspeed;
+    }
+    
+    double get_ymin() const {
+        return ymin;
+    }
+    
+    double get_ymax() const {
+        return ymin + ysize;
+    }
+    
+    TextureWrapper get_texture() const override {
+        return texture;
     }
     
 private:
     TextureWrapper texture;
-    
     const std::vector<std::string> lines;
-    const GLfloat ysize;
-    GLfloat ymin = 0.f;
-    GLfloat yspeed = 0.f;
-    
-    glm::ivec2 roi_pos, roi_size;
+    const double ysize;
+    double ymin = 0;
+    double yspeed = 0;
 };
 
 
