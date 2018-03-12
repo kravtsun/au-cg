@@ -15,5 +15,4 @@ private:
     TextureWrapper texture;
 };
 
-
 #endif //SLOT_MACHINE_STARTBUTTON_H

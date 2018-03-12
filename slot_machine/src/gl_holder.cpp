@@ -23,6 +23,7 @@ GLHolder::GLHolder(std::shared_ptr<WindowManager> window_manager)
                 width(), height(),
                 glm::ivec2(START_BUTTON_POS_X, START_BUTTON_POS_Y),
                 glm::ivec2(START_BUTTON_WIDTH, START_BUTTON_HEIGHT))
+        , fps_render_pass(width(), height())
 {
     cells_pass.set_fgcolor(std::make_shared<ConstantColor>(glm::vec4(0.5, 0, 0, 1)));
     cells_pass.set_bgcolor(std::make_shared<ConstantColor>(glm::vec4(1)));

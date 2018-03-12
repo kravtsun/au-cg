@@ -22,6 +22,15 @@
     <Filter Include="Header Files\Color">
       <UniqueIdentifier>{890b9715-820b-4dc1-8113-ba2b978081f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Color">
+      <UniqueIdentifier>{0da5fd6e-9a84-4a13-9059-5d4ddbe4566b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Roll">
+      <UniqueIdentifier>{b6efafa7-d997-4ecc-b6ad-5f48bdcaa811}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Wrappers">
+      <UniqueIdentifier>{308b9974-5049-4151-a8b1-ac3df4b051aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Button.cpp">
@@ -60,34 +69,37 @@
     <ClCompile Include="..\common\window_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\wrappers\Framebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\wrappers\Program.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\wrappers\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\wrappers\VertexArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\common\wrappers\VertexBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\color\BlinkColor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Color</Filter>
     </ClCompile>
     <ClCompile Include="src\color\ConstantColor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Color</Filter>
     </ClCompile>
     <ClCompile Include="src\roll\ExactRoll.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Roll</Filter>
     </ClCompile>
     <ClCompile Include="src\roll\NextStepRoll.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Roll</Filter>
     </ClCompile>
     <ClCompile Include="src\roll\RandomRoll.cpp">
+      <Filter>Source Files\Roll</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\wrappers\Framebuffer.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\wrappers\Texture.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\wrappers\VertexArray.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\wrappers\VertexBuffer.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\wrappers\Program.cpp">
+      <Filter>Source Files\Wrappers</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FPSRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -123,9 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\window_manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\common\wrappers\texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\wrappers\AllWrappers.h">
@@ -170,5 +179,19 @@
     <ClInclude Include="src\color\BlinkColor.h">
       <Filter>Header Files\Color</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\wrappers\texture.h">
+      <Filter>Header Files\Wrappers</Filter>
+    </ClInclude>
+    <ClInclude Include="FPSRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="pass_texture.fsh" />
+    <ResourceCompile Include="pass_texture.vsh" />
+    <ResourceCompile Include="pass_texture_selective.fsh" />
+    <ResourceCompile Include="pass_texture_start.fsh" />
+    <ResourceCompile Include="text.fsh" />
+    <ResourceCompile Include="text.vsh" />
   </ItemGroup>
 </Project>

@@ -2,12 +2,10 @@
 #define SLOT_MACHINE_GL_HOLDER_H
 
 #include <memory>
-#include <GL/glew.h>
-
 #include "PassthroughPass.h"
 #include "CellsPass.h"
 #include "StartButtonPass.h"
-#include "roll/Roll.h"
+#include "FPSRenderPass.h"
 
 struct WindowManager;
 
@@ -29,7 +27,7 @@ private:
     CellsPass cells_pass;
     StartButtonPass start_button_pass;
     PassthroughPass passthrough_pass;
-    
+    FPSRenderPass fps_render_pass;
 };
 
 #endif //SLOT_MACHINE_GL_HOLDER_H

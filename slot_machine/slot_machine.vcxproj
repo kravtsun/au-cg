@@ -88,17 +88,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdparty\glm\include;$(ProjectDir)..\common;$(ProjectDir)..\3rdparty\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdparty\glm\include;$(ProjectDir)..\common;$(ProjectDir)..\3rdparty\freeglut\include;$(ProjectDir)..\3rdparty\freetype-windows-binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\freeglut\lib;$(ProjectDir)..\3rdparty\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\freeglut\lib;$(ProjectDir)..\3rdparty\glew-2.1.0\lib\Release\Win32;$(ProjectDir)..\3rdparty\freetype-windows-binaries\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)\..\3rdparty\glew-2.1.0\bin\Release\Win32\glew32.dll" "$(TargetDir)\glew32.dll"
-copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\freeglut.dll"</Command>
+copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\freeglut.dll"
+copy /Y "$(ProjectDir)\..\3rdparty\freetype-windows-binaries\win32\freetype.dll" "$(TargetDir)\freetype.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -126,19 +127,20 @@ copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\free
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdparty\glm\include;$(ProjectDir)..\common;$(ProjectDir)..\3rdparty\freeglut\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdparty\glm\include;$(ProjectDir)..\common;$(ProjectDir)..\3rdparty\freeglut\include;$(ProjectDir)..\3rdparty\freetype-windows-binaries\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\freeglut\lib;$(ProjectDir)..\3rdparty\glew-2.1.0\lib\Release\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>freeglut.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\3rdparty\freeglut\lib;$(ProjectDir)..\3rdparty\glew-2.1.0\lib\Release\Win32;$(ProjectDir)..\3rdparty\freetype-windows-binaries\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>freeglut.lib;glew32.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(ProjectDir)\..\3rdparty\glew-2.1.0\bin\Release\Win32\glew32.dll" "$(TargetDir)\glew32.dll"
-copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\freeglut.dll"</Command>
+copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\freeglut.dll"
+copy /Y "$(ProjectDir)\..\3rdparty\freetype-windows-binaries\win32\freetype.dll" "$(TargetDir)\freetype.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -177,6 +179,7 @@ copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\free
     <ClCompile Include="src\CellsPass.cpp" />
     <ClCompile Include="src\color\BlinkColor.cpp" />
     <ClCompile Include="src\color\ConstantColor.cpp" />
+    <ClCompile Include="src\FPSRenderPass.cpp" />
     <ClCompile Include="src\gl_holder.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\roll\ExactRoll.cpp" />
@@ -198,6 +201,7 @@ copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\free
     <ClInclude Include="..\common\wrappers\texture.h" />
     <ClInclude Include="..\common\wrappers\VertexArray.h" />
     <ClInclude Include="..\common\wrappers\VertexBuffer.h" />
+    <ClInclude Include="FPSRenderPass.h" />
     <ClInclude Include="src\Button.h" />
     <ClInclude Include="src\CellHolder.h" />
     <ClInclude Include="src\CellsPass.h" />
@@ -212,6 +216,40 @@ copy /Y "$(ProjectDir)\..\3rdparty\freeglut\bin\freeglut.dll" "$(TargetDir)\free
     <ClInclude Include="src\roll\Roll.h" />
     <ClInclude Include="src\StartButton.h" />
     <ClInclude Include="src\StartButtonPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="pass_texture.fsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="pass_texture_selective.fsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="pass_texture_start.fsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="text.fsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="pass_texture.vsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
+    <ResourceCompile Include="text.vsh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ResourceCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
