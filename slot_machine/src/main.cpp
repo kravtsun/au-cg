@@ -18,7 +18,6 @@ static double get_time_elapsed(clock_t time_delta) {
 }
 
 #if defined(__unix__)
-
 #include <pthread.h>
 static void* simpleFunc(void*) {
     return NULL;
@@ -36,7 +35,7 @@ int main(int argc, char **argv) {
     clock_t ammortization_time = 0;
     clock_t begin = 0, end = 0;
 
-    window_manager->main_loop([&]() {
+    auto main_loop_func = [&]() {
         ammortization_time = end - begin;
         begin = clock();
         gl_holder->paint();
@@ -47,7 +46,7 @@ int main(int argc, char **argv) {
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;
 //        std::cout << "wait: " << wait_time_in_secs * 1000 << " msecs." << std::endl;
         if (wait_time_in_usecs >= 1) {
-           usleep(static_cast<__useconds_t>(wait_time_in_usecs));
+            usleep(static_cast<__useconds_t>(wait_time_in_usecs));
 #elif _WIN32
         auto wait_time_in_msecs = static_cast<int>(wait_time_in_secs * 1000);
         if (wait_time_in_msecs >= 1) {
@@ -55,7 +54,14 @@ int main(int argc, char **argv) {
 #endif
         }
         end = clock();
-    });
+    };
+    
+    auto mouse_action = [&](int button, int state, int x, int y) {
+        gl_holder->click(x, y);
+    };
+
+    window_manager->set_mouse_action(mouse_action);
+    window_manager->main_loop(main_loop_func);
 
     return 0;
 }

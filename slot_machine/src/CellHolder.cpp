@@ -46,8 +46,8 @@ CellHolder::CellHolder(const glm::ivec2 &roi_pos,
     delete []full_bmp;
 }
 
-void CellHolder::prepare() {
-    Button::prepare();
+void CellHolder::step() {
+    Button::step();
     ymin += yspeed;
     if (ymin > 1) {
         ymin -= 1;

@@ -19,7 +19,7 @@ void StartButtonPass::pass() {
     glUniform4fv(fg_color_id, 1, &current_fgcolor[0]);
     glUniform4fv(bg_color_id, 1, &current_bgcolor[0]);
     start_button.get_texture()->bind_as_input(pass_texture_id);
-    start_button.prepare();
+    start_button.step();
     draw_quad();
 }
 

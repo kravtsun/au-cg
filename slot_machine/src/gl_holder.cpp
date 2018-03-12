@@ -1,8 +1,10 @@
+#include <algorithm>
+#include <iterator>
+#include <iostream>
 #include <cassert>
 
 #include "gl_holder.h"
 #include "window_manager.h"
-#include "color/ConstantColor.h"
 #include "color/BlinkColor.h"
 
 #define START_BUTTON_POS_X 320
@@ -44,6 +46,15 @@ void GLHolder::paint() {
     cells_pass.pass();
     start_button_pass.pass();
     assert(glGetError() == GL_NO_ERROR);
+}
+
+void GLHolder::click(double x, double y) {
+    y = height() - y;
+    if (x > START_BUTTON_POS_X && x <= START_BUTTON_POS_X + START_BUTTON_WIDTH &&
+        y > START_BUTTON_POS_Y && y <= START_BUTTON_POS_Y + START_BUTTON_HEIGHT)
+    {
+        cells_pass.start();
+    }
 }
 
 GLHolder::~GLHolder() = default;

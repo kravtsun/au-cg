@@ -11,6 +11,6 @@ Button::Button(const glm::ivec2 &position, const glm::ivec2 &size)
     }
 }
 
-void Button::prepare() {
+void Button::step() {
     glViewport(position.x, position.y, size.x, size.y);
 }

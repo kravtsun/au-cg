@@ -7,6 +7,7 @@
 #include "PassthroughPass.h"
 #include "CellsPass.h"
 #include "StartButtonPass.h"
+#include "roll/Roll.h"
 
 struct WindowManager;
 
@@ -19,6 +20,8 @@ struct GLHolder {
     
     virtual void paint();
     
+    void click(double x, double y);
+    
     virtual ~GLHolder();
 
 private:
@@ -26,6 +29,7 @@ private:
     CellsPass cells_pass;
     StartButtonPass start_button_pass;
     PassthroughPass passthrough_pass;
+    
 };
 
 #endif //SLOT_MACHINE_GL_HOLDER_H

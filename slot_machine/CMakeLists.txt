@@ -33,9 +33,16 @@ file(GLOB WRAPPER_FILES
 set(SOURCE_FILES
         src/main.cpp
         src/gl_holder.h src/gl_holder.cpp
+
         src/color/ColorSupplier.h
         src/color/BlinkColor.h src/color/BlinkColor.cpp
         src/color/ConstantColor.h src/color/ConstantColor.cpp
+
+        src/roll/Roll.h
+        src/roll/NextStepRoll.cpp src/roll/NextStepRoll.h
+        src/roll/ExactRoll.cpp src/roll/ExactRoll.h
+        src/roll/RandomRoll.cpp src/roll/RandomRoll.h
+
         src/Button.h src/Button.cpp
         src/StartButton.h src/StartButton.cpp
         src/StartButtonPass.h src/StartButtonPass.cpp
@@ -43,7 +50,8 @@ set(SOURCE_FILES
         src/CellHolder.h src/CellHolder.cpp
 )
 
-set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES} src/StartButton.cpp src/StartButton.h src/color/BlinkColor.cpp src/color/BlinkColor.h src/color/ColorSupplier.h src/color/ConstantColor.cpp src/color/ConstantColor.h src/resources.h)
+set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES}
+        src/resources.h)
 
 add_executable(slot_machine
         ../3rdparty/glm

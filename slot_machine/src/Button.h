@@ -7,7 +7,7 @@
 struct Button {
     Button(const glm::ivec2 &position, const glm::ivec2 &size);
     
-    virtual void prepare();
+    virtual void step();
     
     virtual TextureWrapper get_texture() const = 0;
     

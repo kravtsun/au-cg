@@ -19,7 +19,7 @@ struct CellHolder: Button {
                const std::vector<std::string> &lines,
                const std::map<char, uchar *> &textures_data);
 
-    void prepare() override;
+    void step() override;
     
     void set_yspeed(double new_yspeed) {
         yspeed = new_yspeed;
@@ -27,6 +27,10 @@ struct CellHolder: Button {
     
     double get_ymin() const {
         return ymin;
+    }
+    
+    void set_ymin(double new_ymin) {
+        ymin = new_ymin;
     }
     
     double get_ymax() const {
