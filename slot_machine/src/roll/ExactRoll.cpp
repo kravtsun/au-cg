@@ -8,7 +8,7 @@ bool ExactRoll::is_exhausted() const {
     return nframes <= 0;
 }
 
-bool ExactRoll::step() {
+void ExactRoll::step() {
     if (nframes > 0) {
         nframes--;
     }

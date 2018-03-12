@@ -1,0 +1,10 @@
+prefix=C:/Users/Andrey/Downloads/freeglut-3.0.0/install
+libdir=C:/Users/Andrey/Downloads/freeglut-3.0.0/install/lib
+includedir=${prefix}/include
+
+Name: glut
+Description: A freely licensed and improved alternative to the GLUT library
+Version: 3.0.0
+Libs: -L${libdir} -lglut
+Libs.private: -lopengl32 -lwinmm -lgdi32 -lm
+Cflags: -I${includedir} 

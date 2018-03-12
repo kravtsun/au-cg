@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 #include <cassert>
 #include "RandomRoll.h"
@@ -18,12 +19,12 @@ RandomRoll::RandomRoll(int nframes, const std::vector<int> &value_counts, int mi
     std::vector<double> speeds;
     assert(choices.size() == ncells);
     std::transform(choices.cbegin(), choices.cend(), value_counts.cbegin(), std::back_inserter(speeds),
-                   [&](int choice, int ncells) {
+                   [&](int choice, int nvalues) {
                        auto const nloops = rand() % (max_loops - min_loops + 1) + min_loops;
-                       auto const distance = nloops + choice * (1. / ncells);
+                       auto const distance = nloops + choice * (1. / nvalues);
                        return distance / nframes;
                    });
-    for (int i = 0; i < ncells; ++i) {
+    for (size_t i = 0; i < ncells; ++i) {
         set_speed(i, speeds[i]);
     }
 }

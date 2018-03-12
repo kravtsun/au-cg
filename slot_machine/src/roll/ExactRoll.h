@@ -11,7 +11,7 @@ struct ExactRoll: Roll {
     
     bool is_exhausted() const override;
     
-    bool step() override;
+    void step() override;
     
     virtual ~ExactRoll() = default;
 

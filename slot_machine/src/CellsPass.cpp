@@ -1,7 +1,6 @@
-#include <iostream>
 #include <map>
 #include <algorithm>
-#include <numeric>
+#include <iterator>
 
 #include "CellsPass.h"
 #include "wrappers/AllWrappers.h"
@@ -76,17 +75,18 @@ void CellsPass::pass() {
     }
     
     if (roll != nullptr) {
+        auto const ncells = cells_lines.size();
         if (roll->is_exhausted()) {
             roll.reset();
             const double EPS = 1e-7;
-            for (int i = 0; i < cells_lines.size(); ++i) {
+            for (size_t i = 0; i < ncells; ++i) {
                 auto &cell = cell_holders[i];
                 cell.set_yspeed(0);
                 
                 // stabilize position
                 auto const count = cells_lines[i].size();
                 auto const step = 1. / count;
-                for (int j = 0; j < count; ++j) {
+                for (size_t j = 0; j < count; ++j) {
                     auto const assumed_position = step * j;
                     if (fabs(cell.get_ymin() - assumed_position) < EPS) {
                         cell.set_ymin(assumed_position);
@@ -94,8 +94,7 @@ void CellsPass::pass() {
                 }
             }
         } else {
-            auto const ncells = cell_holders.size();
-            for (int i = 0; i < ncells; ++i) {
+            for (size_t i = 0; i < ncells; ++i) {
                 cell_holders[i].set_yspeed(roll->get_speed(i));
             }
             roll->step();
@@ -122,3 +121,4 @@ void CellsPass::start() {
                    [](const std::vector<std::string> &cell_lines) { return cell_lines.size(); });
     roll = std::make_shared<RandomRoll>(NFRAMES, cell_counts);
 }
+

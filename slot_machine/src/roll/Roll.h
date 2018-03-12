@@ -6,7 +6,7 @@ struct Roll {
     
     virtual bool is_exhausted() const = 0;
     
-    virtual bool step() = 0;
+    virtual void step() = 0;
     
     virtual ~Roll() = default;
 };
