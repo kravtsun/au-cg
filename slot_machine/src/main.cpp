@@ -1,5 +1,4 @@
 #include <iostream>
-#include <ctime>
 #include <memory>
 #if __linux__
 #include <unistd.h>
@@ -10,13 +9,10 @@
 #include <glm/glm.hpp>
 #include "gl_holder.h"
 #include "glut_window_manager.h"
+#include "FPSRenderPass.h"
 
 static const double FPS = 60.0;
 static const double FRAME_TIME = 1.0 / FPS;
-
-static double get_time_elapsed(clock_t time_delta) {
-    return static_cast<double>(time_delta) / CLOCKS_PER_SEC;
-}
 
 #if defined(__unix__)
 #include <pthread.h>
@@ -33,19 +29,16 @@ int main(int argc, char **argv) {
     auto window_manager = std::make_shared<GLUTWindowManager>("SlotMachine", 1024, 768, argc, argv);
     auto gl_holder = std::make_shared<GLHolder>(window_manager);
 
-    clock_t ammortization_time = 0;
-    clock_t begin = 0, end = 0;
-
+    time_point begin, end;
     auto main_loop_func = [&]() {
-        ammortization_time = end - begin;
-        begin = clock();
+        begin = now_time();
+        auto const ammortization_time = get_seconds(begin, end);
         gl_holder->paint();
-        end = clock();
-        auto elapsed_secs = get_time_elapsed(end - begin + ammortization_time);
+        end = now_time();
+        auto elapsed_secs = get_seconds(end, begin) + ammortization_time;
         auto wait_time_in_secs = FRAME_TIME - elapsed_secs;
 #if __linux__
         auto wait_time_in_usecs = wait_time_in_secs * 1e6;
-//        std::cout << "wait: " << wait_time_in_secs * 1000 << " msecs." << std::endl;
         if (wait_time_in_usecs >= 1) {
             usleep(static_cast<__useconds_t>(wait_time_in_usecs));
 #elif _WIN32
@@ -54,7 +47,7 @@ int main(int argc, char **argv) {
             Sleep(wait_time_in_msecs);
 #endif
         }
-        end = clock();
+        end = now_time();
     };
     
     auto mouse_action = [&](int button, int state, int x, int y) {

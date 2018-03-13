@@ -46,6 +46,7 @@ void GLHolder::paint() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     cells_pass.pass();
     start_button_pass.pass();
+    fps_render_pass.pass();
     assert(glGetError() == GL_NO_ERROR);
 }
 

@@ -1,3 +1,6 @@
+#if _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <iostream>
 #include <stdexcept>
 #include <cassert>
@@ -25,8 +28,17 @@ Texture::operator GLuint() const {
     return texture;
 }
 
-void Texture::bind_data(int width, int height, unsigned char *data) const {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
+void Texture::bind_data(int width, int height, unsigned char *data, int nchannels, GLenum type) const {
+    //target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels)
+    GLint internalformat = GL_RGB;
+    GLenum format = GL_BGR;
+    if (nchannels == 1) {
+        internalformat = GL_RED;
+        format = GL_RED;
+    } else {
+        assert(nchannels == 3);
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format, type, data);
 }
 
 void Texture::bind(GLenum target) const {

@@ -1,6 +1,7 @@
 #ifndef SALUTE_TEXTURE_H
 #define SALUTE_TEXTURE_H
 
+#include <string>
 #include <GL/glew.h>
 
 struct Texture final {
@@ -12,7 +13,7 @@ struct Texture final {
     
     operator GLuint() const;
     
-    void bind_data(int width, int height, unsigned char *data) const;
+    void bind_data(int width, int height, unsigned char *data, int nchannels=3, GLenum type=GL_UNSIGNED_BYTE) const;
     
     void bind(GLenum target=GL_TEXTURE_2D) const;
     

@@ -7,7 +7,8 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-ggdb -pthread")
 
 find_package(GLEW REQUIRED)
 find_package(GLUT REQUIRED)
-include_directories( ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
+find_package(Freetype REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${FREETYPE_INCLUDE_DIRS})
 
 add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../3rdparty/glm
@@ -48,6 +49,7 @@ set(SOURCE_FILES
         src/StartButtonPass.h src/StartButtonPass.cpp
         src/CellsPass.h src/CellsPass.cpp
         src/CellHolder.h src/CellHolder.cpp
+        src/FPSRenderPass.h src/FPSRenderPass.cpp
 )
 
 set(SOURCE_FILES ${COMMON_FILES} ${SOURCE_FILES} ${WRAPPER_FILES}
@@ -59,4 +61,4 @@ add_executable(slot_machine
 )
 
 include_directories(src ../common ../3rdparty/glm)
-target_link_libraries(slot_machine -lGLEW -lGL -lglut)
+target_link_libraries(slot_machine ${GLEW_LIBRARIES} -lGL ${GLUT_LIBRARIES} ${FREETYPE_LIBRARIES})
