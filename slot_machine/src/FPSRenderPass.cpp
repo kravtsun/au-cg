@@ -7,6 +7,8 @@
 #include "FPSRenderPass.h"
 #include "wrappers/AllWrappers.h"
 
+#include "resources.h"
+
 #if _WIN32
 #include "ft2build.h"
 #elif __linux__
@@ -30,7 +32,7 @@ FPSRenderPass::FPSRenderPass(int width, int height, size_t mean_window)
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "arial.ttf", 0, &face)) {
+    if (FT_New_Face(ft, FONT_PATH, 0, &face)) {
         throw std::logic_error("ERROR::FREETYPE: Failed to load font");
     }
 
