@@ -6,7 +6,7 @@
 #define RESOURCES_PATH "resources/"
 #define START_BUTTON_TEXT_PATH RESOURCES_PATH "start1.bmp"
 
-static inline const std::string SYMBOL_PATH(char c) {
+static inline std::string SYMBOL_PATH(char c) {
     return RESOURCES_PATH + std::string(1, c) + ".bmp";
 }
 

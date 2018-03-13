@@ -1,8 +1,6 @@
 #ifndef SALUTE_PASSCOMMON_H
 #define SALUTE_PASSCOMMON_H
 
-#include <string>
-
 #include "wrappers/AllWrappersFwd.h"
 
 typedef unsigned char uchar;
@@ -34,7 +32,6 @@ private:
         auto value_ = (value);          \
         glUniform4fv(id, 1, &value_[0]); \
     } while (false);
-
 
 #define PASS_UNIFORM_MAT4(id, value)                                \
     do {                                                            \

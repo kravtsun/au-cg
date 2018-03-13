@@ -63,9 +63,6 @@
     <ClCompile Include="..\common\PassthroughPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\window_manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -131,9 +128,6 @@
     <ClInclude Include="..\common\glut_window_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\window_manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -182,7 +176,7 @@
     <ClInclude Include="..\common\wrappers\texture.h">
       <Filter>Header Files\Wrappers</Filter>
     </ClInclude>
-    <ClInclude Include="FPSRenderPass.h">
+    <ClInclude Include="src\FPSRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

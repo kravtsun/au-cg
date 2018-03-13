@@ -115,10 +115,10 @@ void FPSRenderPass::display_text(const std::string &text) {
     for (auto const &c : text) {
         auto const &ch = characters.at(c);
         auto const xpos = static_cast<GLfloat>(x + ch.bearing.x * scale);
-        auto const ypos = y - (ch.size.y - ch.bearing.y) * scale;
+        auto const ypos = y - (ch.glyph_size.y - ch.bearing.y) * scale;
         
-        GLfloat w = ch.size.x * scale;
-        GLfloat h = ch.size.y * scale;
+        GLfloat w = ch.glyph_size.x * scale;
+        GLfloat h = ch.glyph_size.y * scale;
         GLfloat vertices[6][4] = {
                 {xpos,     ypos + h, 0.0, 0.0},
                 {xpos,     ypos,     0.0, 1.0},

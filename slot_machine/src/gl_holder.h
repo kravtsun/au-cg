@@ -2,7 +2,6 @@
 #define SLOT_MACHINE_GL_HOLDER_H
 
 #include <memory>
-#include "PassthroughPass.h"
 #include "CellsPass.h"
 #include "StartButtonPass.h"
 #include "FPSRenderPass.h"
@@ -26,7 +25,6 @@ private:
     std::shared_ptr<WindowManager> window_manager;
     CellsPass cells_pass;
     StartButtonPass start_button_pass;
-    PassthroughPass passthrough_pass;
     FPSRenderPass fps_render_pass;
 };
 

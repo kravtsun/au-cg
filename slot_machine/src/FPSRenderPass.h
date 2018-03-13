@@ -6,7 +6,6 @@
 #include <GL/glew.h>
 #include "AbstractPass.h"
 
-//using std::chrono::system_clock::time_point;
 using time_point = std::chrono::high_resolution_clock::time_point;
 
 struct FPSRenderPass : AbstractPass {
@@ -19,7 +18,6 @@ struct FPSRenderPass : AbstractPass {
 private:
     ProgramWrapper program;
     time_point last_time;
-//    double window_time_accumulator = 0;
     size_t time_count = 0;
     size_t mean_window;
     GLint projection_id;
@@ -31,9 +29,14 @@ private:
     /// Holds all state information relevant to a character as loaded using FreeType
     struct CharacterInfo {
         TextureWrapper texture;
-        glm::ivec2 size;    // Size of glyph
-        glm::ivec2 bearing; // Offset from baseline to left/top of glyph
-        GLint advance;      // Horizontal offset to advance to next glyph
+
+        glm::ivec2 glyph_size;
+
+        // Offset from baseline to left/top of glyph
+        glm::ivec2 bearing; 
+
+        // Horizontal offset to advance to next glyph
+        GLint advance;      
     };
     std::map<char, CharacterInfo> characters;
     

@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <iterator>
-#include <iostream>
 #include <cassert>
 
 #include "gl_holder.h"
@@ -17,7 +14,6 @@ static const glm::vec4 BACKGROUND_COLOR{1, 0, 0, 1};
 
 GLHolder::GLHolder(std::shared_ptr<WindowManager> window_manager)
         : window_manager(window_manager)
-        , passthrough_pass(width(), height())
         , cells_pass(width(), height())
         , start_button_pass(
                 width(), height(),

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 #if __linux__
 #include <unistd.h>
@@ -6,7 +5,6 @@
 #include <Windows.h>
 #endif
 
-#include <glm/glm.hpp>
 #include "gl_holder.h"
 #include "glut_window_manager.h"
 #include "FPSRenderPass.h"

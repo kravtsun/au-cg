@@ -18,7 +18,6 @@ add_custom_command(
 )
 
 file(GLOB COMMON_FILES
-        ../common/shader.*
         ../common/window_manager.*
         ../common/glut_window_manager.*
         ../common/AbstractPass.*
