@@ -1,0 +1,1 @@
+Copy *.dll files from this directory into the directory with generated Windows executable.
